@@ -4,4 +4,7 @@ torch
 accelerate
 chromadb
 sentence_transformers
-peft bitsandbytes
+peft 
+bitsandbytes
+jupyter
+ipywidgets
