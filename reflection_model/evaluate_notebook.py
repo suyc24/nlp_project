@@ -1,101 +1,93 @@
-import os
-import torch
 import re
-import json
-import shutil
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+from collections import Counter
 from datasets import load_dataset
-from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 import chromadb
-from peft import PeftModel
+from vllm import LLM, SamplingParams
+import time
 
 # ================= 配置 =================
-BASE_MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
-LORA_PATH = "./evolved_qwen_lora" # 你的 LoRA 权重路径
-DB_PATH = "./reflexion_full_db"   # 你的经验库路径
-BATCH_SIZE = 32
-OUTPUT_FILE = "final_evaluation_report.json"
+MODEL_PATH = "Qwen/Qwen2.5-0.5B-Instruct"
+DB_PATH = "./reflexion_full_db"
+GPU_UTILIZATION = 0.9 
 
-# ================= 工具类 =================
+# 统一参数：两边都跑 SC
+SC_PATHS = 5     
+TOP_K = 3        
+RAG_THRESHOLD = 0.8 
+
+# ================= 1. 记忆管理器 (不变) =================
 class MemoryManager:
     def __init__(self):
         self.client = chromadb.PersistentClient(path=DB_PATH)
         self.collection = self.client.get_collection(name="rule_book")
-        self.stats = {} 
-        self._load_cache()
-
-    def _load_cache(self):
-        try:
-            existing = self.collection.get()
-            if existing['ids']:
-                for i, sid in enumerate(existing['ids']):
-                    self.stats[sid] = existing['metadatas'][i]
-        except:
-            print("⚠️ 警告：无法加载经验库缓存，可能是新库或路径错误")
-
-    def batch_retrieve(self, query_embeddings):
-        count = self.collection.count()
-        if count == 0: return [None] * len(query_embeddings)
         
+    def batch_retrieve(self, query_embeddings, top_k=3):
+        count = self.collection.count()
+        if count == 0: return [[] for _ in range(len(query_embeddings))]
+        real_k = min(top_k, count)
         results_list = []
         try:
-            results = self.collection.query(query_embeddings=query_embeddings, n_results=min(5, count))
+            results = self.collection.query(query_embeddings=query_embeddings, n_results=real_k)
             for i in range(len(query_embeddings)):
+                sample_docs = []
                 if results['ids'][i]:
-                    # 取 Top-1
-                    content = results['documents'][i][0]
-                    dist = results['distances'][i][0]
-                    sid = results['ids'][i][0]
-                    meta = self.stats.get(sid, results['metadatas'][i][0])
-                    # 返回内容和距离
-                    results_list.append((content, dist))
-                else:
-                    results_list.append(None)
+                    for j in range(len(results['ids'][i])):
+                        doc = results['documents'][i][j]
+                        dist = results['distances'][i][j]
+                        sample_docs.append((doc, dist))
+                results_list.append(sample_docs)
         except:
-            return [None] * len(query_embeddings)
-            
+            return [[] for _ in range(len(query_embeddings))]
         return results_list
 
-# ================= 评估器 =================
-class Evaluator:
+# ================= 2. 科学对比评估器 =================
+class ScientificComparator:
     def __init__(self):
-        print(f"🚀 1. 加载基座模型 (Base Model): {BASE_MODEL_NAME}...")
-        self.tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME, padding_side="left")
-        if self.tokenizer.pad_token is None: self.tokenizer.pad_token = self.tokenizer.eos_token
+        print(f"🚀 初始化 vLLM 引擎 (Rigorous Mode)...")
         
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        
-        # 先只加载基座模型
-        self.model = AutoModelForCausalLM.from_pretrained(
-            BASE_MODEL_NAME, 
-            torch_dtype=torch.float16 if self.device == "cuda" else torch.float32, 
-            device_map="auto"
+        self.llm = LLM(
+            model=MODEL_PATH, 
+            trust_remote_code=True,
+            gpu_memory_utilization=GPU_UTILIZATION,
+            tensor_parallel_size=1, 
+            max_model_len=2048
         )
         
-        print("📥 加载 Embedder...")
-        self.embedder = SentenceTransformer('all-MiniLM-L6-v2', device=self.device)
-        self.memory = MemoryManager()
-        
-    def load_lora(self):
-        """在基座模型上挂载 LoRA"""
-        print(f"\n🧬 2. 挂载进化权重 (LoRA): {LORA_PATH}...")
-        # 使用 PeftModel 加载 LoRA，不进行 merge_and_unload 以便对比（或者直接覆盖）
-        self.model = PeftModel.from_pretrained(self.model, LORA_PATH)
-        self.model.eval()
+        # 【关键】定义统一的采样策略 (SC)
+        # 无论是 Base 还是 RAG，都给予 5 次机会进行投票
+        self.params_sc = SamplingParams(
+            n=SC_PATHS, 
+            temperature=0.7, 
+            top_p=0.9, 
+            max_tokens=256,
+            stop=["<|endoftext|>", "<|im_end|>", "Question:"]
+        )
 
-    def batch_generate(self, prompts):
-        inputs = self.tokenizer(prompts, return_tensors="pt", padding=True, truncation=True).to(self.device)
-        with torch.no_grad():
-            outputs = self.model.generate(
-                **inputs, 
-                max_new_tokens=512,
-                temperature=0.01, # 测试时趋近于 0，消除随机性
-                do_sample=False,  # 使用 Greedy Search 保证结果稳定
-                pad_token_id=self.tokenizer.pad_token_id
-            )
-        decoded = self.tokenizer.batch_decode(outputs[:, inputs.input_ids.shape[1]:], skip_special_tokens=True)
-        return [d.strip() for d in decoded]
+        print("📥 加载 Embedder (CPU)...")
+        self.embedder = SentenceTransformer('all-MiniLM-L6-v2', device="cpu")
+        self.memory = MemoryManager()
+
+    def construct_base_prompt(self, question):
+        return f"<|im_start|>user\nQuestion: {question}\nLet's think step by step.\nAnswer:<|im_end|>\n<|im_start|>assistant\n"
+
+    def construct_rag_prompt(self, question, retrieved_items):
+        valid_items = [item[0] for item in retrieved_items if item[1] < RAG_THRESHOLD]
+        if not valid_items:
+            return self.construct_base_prompt(question)
+        
+        context_str = "\n".join([f"Rule {i+1}: {rule}" for i, rule in enumerate(valid_items)])
+        prompt = f"""<|im_start|>user
+You are a math expert. Here are some verified rules that might help solve the problem:
+{context_str}
+
+Question: {question}
+Instruction: Solve the problem step-by-step. If any of the rules above apply, follow them strictly.
+Answer:<|im_end|>
+<|im_start|>assistant
+"""
+        return prompt
 
     def extract_answer(self, text):
         if not text: return None
@@ -104,103 +96,92 @@ class Evaluator:
         if matches: return float(matches[-1])
         return None
 
-    def check_correct(self, pred_str, ground_truth):
-        if "####" in ground_truth:
-            gold = self.extract_answer(ground_truth.split("####")[1])
-        else:
-            gold = self.extract_answer(ground_truth)
-        pred = self.extract_answer(pred_str)
-        if gold is None or pred is None: return False
-        return abs(gold - pred) < 1e-4
+    def majority_vote(self, request_output):
+        """通用投票函数"""
+        valid_nums = []
+        for output in request_output.outputs:
+            num = self.extract_answer(output.text)
+            if num is not None:
+                valid_nums.append(num)
+        if not valid_nums: return None
+        return Counter(valid_nums).most_common(1)[0][0]
 
-    def run_full_comparison(self):
+    def check_correct(self, pred, gt_str):
+        if "####" in gt_str:
+            gold = self.extract_answer(gt_str.split("####")[1])
+        else:
+            gold = self.extract_answer(gt_str)
+        if pred is None or gold is None: return False
+        return abs(pred - gold) < 1e-4
+
+    def run_scientific_test(self):
         dataset = load_dataset("gsm8k", "main")['test']
-        print(f"\n=== 开始三方对比测试 (Test Set: {len(dataset)}) ===")
-        
-        total = len(dataset)
-        
-        # 结果容器
-        results_base = []
-        results_lora_naked = []
-        results_lora_rag = []
-        
         questions = dataset['question']
         ground_truths = dataset['answer']
+        total = len(questions)
         
-        # --- 第一阶段：测试纯基座模型 (Base Model) ---
-        print("\n[Phase 1] 测试基座模型 (Base Model)...")
-        for i in tqdm(range(0, total, BATCH_SIZE)):
-            batch_q = questions[i : i+BATCH_SIZE]
-            prompts = [f"Question: {q}\nLet's think step by step.\nAnswer:" for q in batch_q]
-            answers = self.batch_generate(prompts)
-            results_base.extend(answers)
-            
-        # --- 第二阶段：加载 LoRA 并测试 ---
-        self.load_lora()
+        print(f"📊 测试集大小: {total} | 采样路径 n={SC_PATHS} | 控制变量: RAG Context")
+
+        # ================= Phase 1: Base Model (Self-Consistency) =================
+        print(f"\n🔵 [Group A] Base Model (Self-Consistency)...")
+        base_prompts = [self.construct_base_prompt(q) for q in questions]
         
-        # 预先检索所有 RAG 内容 (为了效率)
-        print("\n[Retrieval] 正在预检索经验库...")
-        all_rag_contexts = []
-        for i in tqdm(range(0, total, BATCH_SIZE)):
-            batch_q = questions[i : i+BATCH_SIZE]
-            q_embeds = self.embedder.encode(batch_q).tolist()
-            # 检索
-            retrieved = self.memory.batch_retrieve(q_embeds)
-            all_rag_contexts.extend(retrieved)
+        t0 = time.time()
+        base_outputs = self.llm.generate(base_prompts, self.params_sc, use_tqdm=True)
+        print(f"   耗时: {time.time()-t0:.2f}s")
 
-        print("\n[Phase 2 & 3] 测试进化模型 (LoRA & RAG)...")
-        for i in tqdm(range(0, total, BATCH_SIZE)):
-            batch_q = questions[i : i+BATCH_SIZE]
-            
-            # A. LoRA Naked Prompts
-            prompts_naked = [f"Question: {q}\nLet's think step by step.\nAnswer:" for q in batch_q]
-            
-            # B. LoRA RAG Prompts
-            prompts_rag = []
-            for j, q in enumerate(batch_q):
-                res = all_rag_contexts[i+j]
-                if res:
-                    content, dist = res
-                    # 如果距离太远，其实不应该用，这里为了强制测试RAG效果，只要有就用
-                    p = f"Hint: {content}\nQuestion: {q}\nAnswer step-by-step:"
-                else:
-                    p = f"Question: {q}\nLet's think step by step.\nAnswer:"
-                prompts_rag.append(p)
-            
-            # 推理
-            ans_naked = self.batch_generate(prompts_naked)
-            ans_rag = self.batch_generate(prompts_rag)
-            
-            results_lora_naked.extend(ans_naked)
-            results_lora_rag.extend(ans_rag)
-
-        # --- 统计分数 ---
         correct_base = 0
-        correct_lora = 0
-        correct_rag = 0
+        for i, out in enumerate(base_outputs):
+            pred = self.majority_vote(out)
+            if self.check_correct(pred, ground_truths[i]):
+                correct_base += 1
         
-        for i in range(total):
-            gt = ground_truths[i]
-            if self.check_correct(results_base[i], gt): correct_base += 1
-            if self.check_correct(results_lora_naked[i], gt): correct_lora += 1
-            if self.check_correct(results_lora_rag[i], gt): correct_rag += 1
-            
         acc_base = correct_base / total * 100
-        acc_lora = correct_lora / total * 100
-        acc_rag = correct_rag / total * 100
+        print(f"   ✅ Base (SC) Accuracy: {acc_base:.2f}%")
+
+        # ================= Phase 2: RAG Model (Self-Consistency) =================
+        print(f"\n🟢 [Group B] RAG Model (Self-Consistency)...")
         
-        print("\n" + "="*50)
-        print("📊 最终三方对比报告")
-        print("="*50)
-        print(f"1. Base Model (0.5B 原生): {acc_base:.2f}%")
-        print(f"2. LoRA Only (内化能力)   : {acc_lora:.2f}%")
-        print(f"3. LoRA + RAG (完整能力)  : {acc_rag:.2f}%")
-        print("-" * 50)
-        print(f"训练带来的内化提升: {acc_lora - acc_base:+.2f}%")
-        print(f"RAG带来的额外提升 : {acc_rag - acc_lora:+.2f}%")
-        print(f"总提升              : {acc_rag - acc_base:+.2f}%")
-        print("="*50)
+        # 预检索
+        print("   -> Retrieving context...")
+        q_embeddings = self.embedder.encode(questions, batch_size=64, show_progress_bar=True, convert_to_numpy=True).tolist()
+        all_retrieved = self.memory.batch_retrieve(q_embeddings, top_k=TOP_K)
+        
+        rag_prompts = []
+        for i, q in enumerate(questions):
+            rag_prompts.append(self.construct_rag_prompt(q, all_retrieved[i]))
+
+        t0 = time.time()
+        rag_outputs = self.llm.generate(rag_prompts, self.params_sc, use_tqdm=True)
+        print(f"   耗时: {time.time()-t0:.2f}s")
+
+        correct_rag = 0
+        for i, out in enumerate(rag_outputs):
+            pred = self.majority_vote(out)
+            if self.check_correct(pred, ground_truths[i]):
+                correct_rag += 1
+        
+        acc_rag = correct_rag / total * 100
+        print(f"   ✅ RAG (SC) Accuracy: {acc_rag:.2f}%")
+
+        # ================= 最终分析 =================
+        print("\n" + "="*60)
+        print("🧪 科学归因分析 (Ablation Study)")
+        print("="*60)
+        print(f"控制变量：Self-Consistency (n={SC_PATHS})")
+        print("-" * 60)
+        print(f"1. 基准能力 (Base + SC)    : {acc_base:.2f}%")
+        print(f"2. 进化能力 (Base + SC + RAG): {acc_rag:.2f}%")
+        print("-" * 60)
+        diff = acc_rag - acc_base
+        print(f"📈 知识库净贡献 (Pure RAG Gain): {diff:+.2f}%")
+        
+        if diff > 0:
+            print("结论：RAG 提供了有效的信息增益，不仅仅是引入了随机性。")
+        else:
+            print("结论：RAG 未能带来正向收益，可能是检索噪音过大或模型未能有效利用提示。")
+        print("="*60)
 
 if __name__ == "__main__":
-    evaluator = Evaluator()
-    evaluator.run_full_comparison()
+    evaluator = ScientificComparator()
+    evaluator.run_scientific_test()
