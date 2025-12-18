@@ -4,3 +4,4 @@ torch
 accelerate
 chromadb
 sentence_transformers
+peft bitsandbytes

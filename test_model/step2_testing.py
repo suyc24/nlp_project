@@ -1,6 +1,10 @@
 # step2_testing.py
 import os
 os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+os.environ.pop("http_proxy", None)
+os.environ.pop("https_proxy", None)
+os.environ.pop("HTTP_PROXY", None)
+os.environ.pop("HTTPS_PROXY", None)
 import json
 import time
 import re
