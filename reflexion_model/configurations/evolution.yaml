@@ -1,0 +1,5 @@
+MODEL_PATH: "Qwen/Qwen2.5-7B-Instruct"
+DB_PATH: "./reflexion_full_db"
+CHUNK_SIZE: 64         
+INFERENCE_BATCH_SIZE: 32 
+MAX_NEW_TOKENS: 256

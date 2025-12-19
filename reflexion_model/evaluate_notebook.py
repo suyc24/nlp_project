@@ -13,21 +13,21 @@ from sentence_transformers import SentenceTransformer
 import chromadb
 from vllm import LLM, SamplingParams
 import time
+import argparse
+import yaml
 
-# ================= 配置 =================
-MODEL_PATH = "Qwen/Qwen2.5-7B-Instruct-AWQ"
-DB_PATH = "./reflexion_full_db"
-GPU_UTILIZATION = 0.9 
-
-# 统一参数：两边都跑 SC
-SC_PATHS = 5     
-TOP_K = 3        
-RAG_THRESHOLD = 0.5 
 
 # ================= 1. 记忆管理器 (不变) =================
 class MemoryManager:
-    def __init__(self):
-        self.client = chromadb.PersistentClient(path=DB_PATH)
+    def __init__(self, config):
+        self.config = config
+        self.MODEL_PATH = config["MODEL_PATH"]
+        self.DB_PATH = config["DB_PATH"]
+        self.GPU_UTILIZATION = config["GPU_UTILIZATION"]
+        self.TOP_K = config["TOP_K"]
+        self.SC_PATHS = config["SC_PATHS"]  
+        self.RAG_THRESHOLD = config["RAG_THRESHOLD"]
+        self.client = chromadb.PersistentClient(path=self.DB_PATH)
         self.collection = self.client.get_collection(name="rule_book")
         
     def batch_retrieve(self, query_embeddings, top_k=3):
@@ -51,13 +51,19 @@ class MemoryManager:
 
 # ================= 2. 科学对比评估器 =================
 class ScientificComparator:
-    def __init__(self):
+    def __init__(self, config):
         print(f"🚀 初始化 vLLM 引擎 (Rigorous Mode)...")
-        
+        self.config = config
+        self.MODEL_PATH = config["MODEL_PATH"]
+        self.DB_PATH = config["DB_PATH"]
+        self.GPU_UTILIZATION = config["GPU_UTILIZATION"]
+        self.TOP_K = config["TOP_K"]
+        self.SC_PATHS = config["SC_PATHS"]  
+        self.RAG_THRESHOLD = config["RAG_THRESHOLD"]
         self.llm = LLM(
-            model=MODEL_PATH, 
+            model=self.MODEL_PATH, 
             trust_remote_code=True,
-            gpu_memory_utilization=GPU_UTILIZATION,
+            gpu_memory_utilization=self.GPU_UTILIZATION,
             tensor_parallel_size=1, 
             max_model_len=2048
         )
@@ -65,7 +71,7 @@ class ScientificComparator:
         # 【关键】定义统一的采样策略 (SC)
         # 无论是 Base 还是 RAG，都给予 5 次机会进行投票
         self.params_sc = SamplingParams(
-            n=SC_PATHS, 
+            n=self.SC_PATHS, 
             temperature=0.7, 
             top_p=0.9, 
             max_tokens=256,
@@ -74,13 +80,13 @@ class ScientificComparator:
 
         print("📥 加载 Embedder (CPU)...")
         self.embedder = SentenceTransformer('all-MiniLM-L6-v2', device="cpu")
-        self.memory = MemoryManager()
+        self.memory = MemoryManager(config)
 
     def construct_base_prompt(self, question):
         return f"<|im_start|>user\nQuestion: {question}\nLet's think step by step.\nAnswer:<|im_end|>\n<|im_start|>assistant\n"
 
     def construct_rag_prompt(self, question, retrieved_items):
-        valid_items = [item[0] for item in retrieved_items if item[1] < RAG_THRESHOLD]
+        valid_items = [item[0] for item in retrieved_items if item[1] < self.RAG_THRESHOLD]
         if not valid_items:
             return self.construct_base_prompt(question)
         
@@ -127,7 +133,7 @@ Answer:<|im_end|>
         ground_truths = dataset['answer']
         total = len(questions)
         
-        print(f"📊 测试集大小: {total} | 采样路径 n={SC_PATHS} | 控制变量: RAG Context")
+        print(f"📊 测试集大小: {total} | 采样路径 n={self.SC_PATHS} | 控制变量: RAG Context")
 
         # ================= Phase 1: Base Model (Self-Consistency) =================
         print(f"\n🔵 [Group A] Base Model (Self-Consistency)...")
@@ -152,7 +158,7 @@ Answer:<|im_end|>
         # 预检索
         print("   -> Retrieving context...")
         q_embeddings = self.embedder.encode(questions, batch_size=64, show_progress_bar=True, convert_to_numpy=True).tolist()
-        all_retrieved = self.memory.batch_retrieve(q_embeddings, top_k=TOP_K)
+        all_retrieved = self.memory.batch_retrieve(q_embeddings, top_k=self.TOP_K)
         
         rag_prompts = []
         for i, q in enumerate(questions):
@@ -175,7 +181,7 @@ Answer:<|im_end|>
         print("\n" + "="*60)
         print("🧪 科学归因分析 (Ablation Study)")
         print("="*60)
-        print(f"控制变量：Self-Consistency (n={SC_PATHS})")
+        print(f"控制变量：Self-Consistency (n={self.SC_PATHS})")
         print("-" * 60)
         print(f"1. 基准能力 (Base + SC)    : {acc_base:.2f}%")
         print(f"2. 进化能力 (Base + SC + RAG): {acc_rag:.2f}%")
@@ -189,6 +195,14 @@ Answer:<|im_end|>
             print("结论：RAG 未能带来正向收益，可能是检索噪音过大或模型未能有效利用提示。")
         print("="*60)
 
+def load_config(path="config.yaml"):
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
+    
 if __name__ == "__main__":
-    evaluator = ScientificComparator()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, default="config.yaml", help="YAML配置文件路径")
+    args = parser.parse_args()
+    config = load_config(args.config)
+    evaluator = ScientificComparator(config)
     evaluator.run_scientific_test()
