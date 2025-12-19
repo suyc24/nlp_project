@@ -6,24 +6,25 @@ from sentence_transformers import SentenceTransformer
 import chromadb
 from vllm import LLM, SamplingParams
 import time
+import argparse 
+import yaml
 
-# ================= Configuration =================
-MODEL_PATH = "Qwen/Qwen2.5-0.5B-Instruct"
-DB_PATH = "./reflexion_full_db"
-GPU_UTILIZATION = 0.9 
 
-# Unified parameters: Both sides use Self-Consistency (SC)
-SC_PATHS = 5     
-TOP_K = 3        
-RAG_THRESHOLD = 0.8 
 
 # ================= 1. Memory Manager (Unchanged) =================
 class MemoryManager:
     # Initialize the MemoryManager.
     # This constructor sets up the ChromaDB client and retrieves the collection.
-    def __init__(self):
-        self.client = chromadb.PersistentClient(path=DB_PATH)
-        self.collection = self.client.get_collection(name="rule_book")
+    def __init__(self, config):
+        self.config = config
+        self.MODEL_PATH = config["MODEL_PATH"]
+        self.DB_PATH = config["DB_PATH"]
+        self.GPU_UTILIZATION = config["GPU_UTILIZATION"]
+        self.TOP_K = config["TOP_K"]
+        self.SC_PATHS = config["SC_PATHS"]  
+        self.RAG_THRESHOLD = config["RAG_THRESHOLD"]
+        self.client = chromadb.PersistentClient(path=self.DB_PATH)
+        self.collection = self.client.get_collection(name="rule_book") 
         
     # Retrieve the most similar documents for a batch of query embeddings.
     # Parameters:
@@ -56,13 +57,19 @@ class MemoryManager:
 class ScientificComparator:
     # Initialize the ScientificComparator.
     # This constructor sets up the vLLM engine, sampling parameters, and embedder.
-    def __init__(self):
+    def __init__(self, config):
         print(f"🚀 Initializing vLLM engine (Rigorous Mode)...")
-        
+        self.config = config
+        self.MODEL_PATH = config["MODEL_PATH"]
+        self.DB_PATH = config["DB_PATH"]
+        self.GPU_UTILIZATION = config["GPU_UTILIZATION"]
+        self.TOP_K = config["TOP_K"]
+        self.SC_PATHS = config["SC_PATHS"]  
+        self.RAG_THRESHOLD = config["RAG_THRESHOLD"]
         self.llm = LLM(
-            model=MODEL_PATH, 
+            model=self.MODEL_PATH, 
             trust_remote_code=True,
-            gpu_memory_utilization=GPU_UTILIZATION,
+            gpu_memory_utilization=self.GPU_UTILIZATION,
             tensor_parallel_size=1, 
             max_model_len=2048
         )
@@ -70,7 +77,7 @@ class ScientificComparator:
         # Define unified sampling strategy (SC)
         # Both Base and RAG models are given 5 chances for voting.
         self.params_sc = SamplingParams(
-            n=SC_PATHS, 
+            n=self.SC_PATHS, 
             temperature=0.7, 
             top_p=0.9, 
             max_tokens=256,
@@ -79,7 +86,7 @@ class ScientificComparator:
 
         print("📥 Loading Embedder (CPU)...")
         self.embedder = SentenceTransformer('all-MiniLM-L6-v2', device="cpu")
-        self.memory = MemoryManager()
+        self.memory = MemoryManager(config)
 
     # Construct a base prompt for the model.
     # Parameters:
@@ -100,7 +107,7 @@ class ScientificComparator:
     # Returns:
     # - str: The constructed prompt.
     def construct_rag_prompt(self, question, retrieved_items):
-        valid_items = [item[0] for item in retrieved_items if item[1] < RAG_THRESHOLD]
+        valid_items = [item[0] for item in retrieved_items if item[1] < self.RAG_THRESHOLD]
         if not valid_items:
             return self.construct_base_prompt(question)
         
@@ -172,7 +179,7 @@ Answer:<|im_end|>
         ground_truths = dataset["answer"]
         total = len(questions)
         
-        print(f"📊 Test set size: {total} | Sampling paths n={SC_PATHS} | Control variable: RAG Context")
+        print(f"📊 Test set size: {total} | Sampling paths n={self.SC_PATHS} | Control variable: RAG Context")
 
         # ================= Phase 1: Base Model (Self-Consistency) =================
         print(f"\n🔵 [Group A] Base Model (Self-Consistency)...")
@@ -197,7 +204,7 @@ Answer:<|im_end|>
         # Pre-retrieval
         print("   -> Retrieving context...")
         q_embeddings = self.embedder.encode(questions, batch_size=64, show_progress_bar=True, convert_to_numpy=True).tolist()
-        all_retrieved = self.memory.batch_retrieve(q_embeddings, top_k=TOP_K)
+        all_retrieved = self.memory.batch_retrieve(q_embeddings, top_k=self.TOP_K)
         
         rag_prompts = []
         for i, q in enumerate(questions):
@@ -220,7 +227,7 @@ Answer:<|im_end|>
         print("\n" + "="*60)
         print("🧪 Scientific Attribution Analysis (Ablation Study)")
         print("="*60)
-        print(f"Control variable: Self-Consistency (n={SC_PATHS})")
+        print(f"Control variable: Self-Consistency (n={self.SC_PATHS})")
         print("-" * 60)
         print(f"1. Baseline Capability (Base + SC): {acc_base:.2f}%")
         print(f"2. Evolution Capability (Base + SC + RAG): {acc_rag:.2f}%")
@@ -233,7 +240,16 @@ Answer:<|im_end|>
         else:
             print("Conclusion: RAG failed to provide positive gain, possibly due to retrieval noise or ineffective prompt utilization.")
         print("="*60)
+        
 
+def load_config(path="config.yaml"):
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
+    
 if __name__ == "__main__":
-    evaluator = ScientificComparator()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, default="config.yaml", help="YAML配置文件路径")
+    args = parser.parse_args()
+    config = load_config(args.config)
+    evaluator = ScientificComparator(config)
     evaluator.run_scientific_test()
