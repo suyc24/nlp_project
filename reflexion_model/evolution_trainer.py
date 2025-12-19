@@ -260,8 +260,6 @@ Answer step-by-step and give ONLY the final answer.
     def run_full_evolution(self):
         # 1. 准备数据
         dataset = load_dataset("gsm8k", "main")['train'].select(range(200)) 
-        # 为了测试流畅，建议只取部分数据，若要全量可去掉切片，例如: dataset
-        # dataset = dataset.select(range(1000)) 
         
         total_len = len(dataset)
         print(f"⚡️ 正在预计算 {total_len} 条问题的 Embedding (CPU Mode)...")
@@ -277,7 +275,6 @@ Answer step-by-step and give ONLY the final answer.
         epoch = 0
         best_acc = 0.0
 
-        # [修改逻辑] 只要没达到目标准确率且未超时，就持续训练
         while best_acc < TARGET_ACCURACY and epoch < MAX_EPOCHS:
             epoch += 1
             print(f"\n======== Epoch {epoch}/{MAX_EPOCHS} ========")
@@ -288,76 +285,110 @@ Answer step-by-step and give ONLY the final answer.
             epoch_correct_count = 0
             epoch_total_count = 0
             
-            # 使用 tqdm 显示当前 Epoch 进度
             pbar = tqdm(range(0, total_len, CHUNK_SIZE), desc=f"Epoch {epoch} Training")
             
             for chunk_start in pbar:
                 chunk_end = min(chunk_start + CHUNK_SIZE, total_len)
                 current_batch_indices = indices[chunk_start:chunk_end]
                 
-                # 根据打乱的索引获取数据
+                # 获取当前 Batch 的原始数据
                 chunk_questions = [all_questions_raw[i] for i in current_batch_indices]
                 chunk_answers = [all_answers_raw[i] for i in current_batch_indices]
-                # 获取对应的预计算 embedding
                 chunk_q_embeddings = all_q_embeddings[current_batch_indices]
                 
-                # --- A. 批量检索 ---
-                retrieved_batch = self.memory.batch_retrieve(chunk_q_embeddings, top_k=3, threshold=0.4)
+                # ================= 阶段 1: Zero-shot 推理 =================
+                zero_shot_prompts = [self.construct_prompt(q) for q in chunk_questions]
+                zs_outputs = self.batch_generate_vllm(zero_shot_prompts, self.params_inference)
                 
-                used_rag_data = []      # 用于 update_scores (存放 List[tuple])
-                inference_prompts = []  # 用于 vLLM 推理
+                # 评估 Zero-shot 结果
+                zs_is_correct = []
+                incorrect_local_indices = [] # 记录在这个 chunk 中做错的下标
                 
-                for idx, q in enumerate(chunk_questions):
-                    prompt = self.construct_prompt(q)
-                    inference_prompts.append(prompt)
-                    used_rag_data.append([])
-                
-                # --- B. vLLM 批量推理 ---
-                model_outputs = self.batch_generate_vllm(inference_prompts, self.params_inference)
-                
-                # --- C. 评估 & 准备反馈 ---
-                is_correct_list = []
-                correct_samples = [] 
-                incorrect_indices = []
-                
-                for idx, pred in enumerate(model_outputs):
+                for idx, pred in enumerate(zs_outputs):
                     gt = chunk_answers[idx]
                     is_right = self.check_answer(pred, gt)
-                    is_correct_list.append(is_right)
+                    zs_is_correct.append(is_right)
                     
                     if is_right:
-                        correct_samples.append((chunk_questions[idx], gt)) 
                         epoch_correct_count += 1
                     else:
-                        incorrect_indices.append(idx)
+                        incorrect_local_indices.append(idx)
                     epoch_total_count += 1
                 
-                # 更新分数
-                self.memory.update_scores_batch(used_rag_data, is_correct_list, model_outputs)
+                # ================= 阶段 2: RAG 重算 (仅针对错题) =================
+                rag_usage_for_update = []
+                rag_is_correct_for_update = []
+                rag_outputs_for_update = []
+                
+                still_incorrect_indices = []   # RAG 后依然做错的下标，用于反思
+                
+                if incorrect_local_indices:
+                    # 1. 准备错题数据
+                    wrong_questions = [chunk_questions[i] for i in incorrect_local_indices]
+                    wrong_embeddings = chunk_q_embeddings[incorrect_local_indices]
+                    wrong_answers = [chunk_answers[i] for i in incorrect_local_indices]
+                    
+                    # 2. 检索规则
+                    retrieved_batch = self.memory.batch_retrieve(wrong_embeddings, top_k=3, threshold=0.4)
+                    
+                    rag_prompts = []
+                    valid_rag_indices_map = [] # 记录有规则的错题对应的是哪个 local index
+                    
+                    for k, q in enumerate(wrong_questions):
+                        rules_list = retrieved_batch[k]
+                        if rules_list:
+                            context_text = "\n".join([f"- {r[0]}" for r in rules_list])
+                            rag_prompts.append(self.construct_prompt(q, context_text))
+                            # 记录数据以便后续 update_score
+                            rag_usage_for_update.append(rules_list)
+                            valid_rag_indices_map.append(k)
+                        else:
+                            # 如果没检索到规则，就没必要 RAG 重算了，直接视为依然错误
+                            rag_usage_for_update.append([]) # 空规则占位，不参与更新但保持索引对齐
+                            rag_prompts.append(None) # 占位
+                            still_incorrect_indices.append(incorrect_local_indices[k])
 
-                with open(self.rag_log_path, "a") as f:
-                    for i in range(len(chunk_questions)):
-                        log_entry = {
-                            "epoch": epoch,
-                            "question": chunk_questions[i],
-                            "is_correct": is_correct_list[i],
-                            "used_rules": [
-                                {
-                                    "sid": sid,
-                                    "distance": float(dist),
-                                    "content": content
-                                }
-                                for (content, dist, sid) in used_rag_data[i]
-                            ]
-                        }
-                        f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+                    # 3. 执行 RAG 推理 (只推理有 Prompts 的部分)
+                    real_rag_prompts = [p for p in rag_prompts if p is not None]
+                    if real_rag_prompts:
+                        real_rag_outputs = self.batch_generate_vllm(real_rag_prompts, self.params_inference)
+                    
+                    # 4. 评估 RAG 结果并准备 Update 数据
+                    output_cursor = 0
+                    for k, q in enumerate(wrong_questions):
+                        if rag_prompts[k] is None:
+                            # 没规则，跳过 Update，直接判定为 Refection 候选
+                            continue
+                            
+                        pred = real_rag_outputs[output_cursor]
+                        output_cursor += 1
+                        
+                        gt = wrong_answers[k]
+                        is_right = self.check_answer(pred, gt)
+                        
+                        # 记录 Update 数据
+                        rag_is_correct_for_update.append(is_right)
+                        rag_outputs_for_update.append(pred)
+                        
+                        if not is_right:
+                            still_incorrect_indices.append(incorrect_local_indices[k])
+                    
+                    # 5. 更新 Memory 分数 (仅针对使用了 RAG 的错题)
+                    # 注意：这里需要过滤掉 rag_usage_for_update 中的空列表，虽然 update_scores_batch 内部也会跳过空列表，但为了对齐 is_correct_list 最好清洗一下
+                    clean_usage = []
+                    clean_correct = []
+                    clean_outputs = []
+                    final_usage = [rag_usage_for_update[k] for k in range(len(wrong_questions)) if rag_prompts[k] is not None]
+                    
+                    if final_usage:
+                        self.memory.update_scores_batch(final_usage, rag_is_correct_for_update, rag_outputs_for_update)
 
-                # --- D. 批量反思与自生成经验 (只针对错题) ---
-                if incorrect_indices:
+                # ================= 阶段 3: 反思 (仅针对 RAG 后依然错误的题) =================
+                if still_incorrect_indices:
                     reflect_prompts = []
                     verify_data = [] 
                     
-                    for idx in incorrect_indices:
+                    for idx in still_incorrect_indices:
                         q = chunk_questions[idx]
                         gt = chunk_answers[idx]
                         
@@ -415,17 +446,17 @@ Summarize the rule:"""
                             p_embeds = self.embedder.encode(verified_patterns, convert_to_numpy=True).tolist()
                             self.memory.add_experience_batch(verified_patterns, verified_strategies, p_embeds)
 
-                # --- E. 定期淘汰 ---
+                # --- 定期淘汰 ---
                 if (chunk_start // CHUNK_SIZE) % 5 == 0:
                     self.memory.prune_db(threshold=0.25)
 
-                # 更新进度条信息
-                batch_acc = len(correct_samples) / len(chunk_questions) * 100
-                pbar.set_postfix({"Batch Acc": f"{batch_acc:.1f}%", "DB Size": self.memory.collection.count()})
+                # 更新进度条信息 (这里的 Accuracy 是 Zero-shot 的准确率)
+                batch_acc = len([x for x in zs_is_correct if x]) / len(chunk_questions) * 100
+                pbar.set_postfix({"ZS Acc": f"{batch_acc:.1f}%", "DB": self.memory.collection.count()})
             
             # --- Epoch 总结 ---
             current_epoch_acc = (epoch_correct_count / epoch_total_count) * 100
-            print(f"\n📊 Epoch {epoch} 完成 | 准确率: {current_epoch_acc:.2f}% (Target: {TARGET_ACCURACY}%)")
+            print(f"\n📊 Epoch {epoch} 完成 | Zero-shot 准确率: {current_epoch_acc:.2f}% (Target: {TARGET_ACCURACY}%)")
             
             if current_epoch_acc > best_acc:
                 best_acc = current_epoch_acc
@@ -456,23 +487,18 @@ Summarize the rule:"""
         return abs(gold - pred_num) < 1e-4
 
     def cleanup(self):
-        """
-        显式释放 vLLM 资源和显存
-        """
         print("🧹 正在清理显存和 vLLM 进程...")
         if hasattr(self, 'llm'):
             del self.llm
         import gc
         gc.collect()
         torch.cuda.empty_cache()
-        
         try:
             import ray
             if ray.is_initialized():
                 ray.shutdown()
         except ImportError:
             pass
-            
         print("✅ 清理完成！")
 
 if __name__ == "__main__":
