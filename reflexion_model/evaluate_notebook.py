@@ -15,7 +15,7 @@ from vllm import LLM, SamplingParams
 import time
 
 # ================= 配置 =================
-MODEL_PATH = "Qwen/Qwen2.5-7B-Instruct"
+MODEL_PATH = "Qwen/Qwen2.5-7B-Instruct-AWQ"
 DB_PATH = "./reflexion_full_db"
 GPU_UTILIZATION = 0.9 
 
