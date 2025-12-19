@@ -13,6 +13,7 @@ import random
 import re
 import torch
 import chromadb
+import json
 import numpy as np
 from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
@@ -26,7 +27,7 @@ CHUNK_SIZE = 64  # 处理单元大小
 MAX_NEW_TOKENS = 256
 GPU_MEMORY_UTILIZATION = 0.90 
 TARGET_ACCURACY = 92.0  # [修改] 目标准确率，达到后停止训练
-MAX_EPOCHS = 10         # [修改] 最大训练轮数，防止死循环
+MAX_EPOCHS = 5        # [修改] 最大训练轮数，防止死循环
 
 # ================= 1. 记忆管理器 (保持不变) =================
 class MemoryManager:
@@ -188,6 +189,9 @@ class ReflexionTrainerFull:
         
         self.memory = MemoryManager(reset=True)
 
+        self.rag_log_path = "rag_usage_log.jsonl"
+        open(self.rag_log_path, "w").close() 
+
     def batch_generate_vllm(self, prompts, sampling_params):
         outputs = self.llm.generate(prompts, sampling_params, use_tqdm=False)
         return [output.outputs[0].text.strip() for output in outputs]
@@ -237,14 +241,25 @@ class ReflexionTrainerFull:
 
     def construct_prompt(self, q, context=None):
         if context:
-            content = f"Reference rule: {context}\nQuestion: {q}\nAnswer step-by-step:"
+            content = f"""
+You may use the following abstract strategy ONLY if it is relevant.
+Do NOT introduce new examples, sub-questions, or conditions.
+
+[STRATEGY]
+{context}
+
+[QUESTION]
+{q}
+
+Answer step-by-step and give ONLY the final answer.
+"""
         else:
             content = f"Question: {q}\nAnswer step-by-step:"
         return f"<|im_start|>user\n{content}<|im_end|>\n<|im_start|>assistant\n"
 
     def run_full_evolution(self):
         # 1. 准备数据
-        dataset = load_dataset("gsm8k", "main")['train']
+        dataset = load_dataset("gsm8k", "main")['train'].select(range(200)) 
         # 为了测试流畅，建议只取部分数据，若要全量可去掉切片，例如: dataset
         # dataset = dataset.select(range(1000)) 
         
@@ -287,25 +302,15 @@ class ReflexionTrainerFull:
                 chunk_q_embeddings = all_q_embeddings[current_batch_indices]
                 
                 # --- A. 批量检索 ---
-                retrieved_batch = self.memory.batch_retrieve(chunk_q_embeddings, top_k=3, threshold=0.6)
+                retrieved_batch = self.memory.batch_retrieve(chunk_q_embeddings, top_k=3, threshold=0.4)
                 
                 used_rag_data = []      # 用于 update_scores (存放 List[tuple])
                 inference_prompts = []  # 用于 vLLM 推理
                 
                 for idx, q in enumerate(chunk_questions):
-                    rules_list = retrieved_batch[idx] # [(content, dist, sid), ...]
-                    
-                    if rules_list:
-                        # 拼接多条规则
-                        rules_text = "\n".join([f"Rule {i+1}: {r[0]}" for i, r in enumerate(rules_list)])
-                        prompt = self.construct_prompt(q, rules_text)
-                        used_rag_data.append(rules_list)
-                    else:
-                        # Zero-shot
-                        prompt = self.construct_prompt(q)
-                        used_rag_data.append([]) # 空列表表示没用规则
-                        
+                    prompt = self.construct_prompt(q)
                     inference_prompts.append(prompt)
+                    used_rag_data.append([])
                 
                 # --- B. vLLM 批量推理 ---
                 model_outputs = self.batch_generate_vllm(inference_prompts, self.params_inference)
@@ -329,6 +334,23 @@ class ReflexionTrainerFull:
                 
                 # 更新分数
                 self.memory.update_scores_batch(used_rag_data, is_correct_list, model_outputs)
+
+                with open(self.rag_log_path, "a") as f:
+                    for i in range(len(chunk_questions)):
+                        log_entry = {
+                            "epoch": epoch,
+                            "question": chunk_questions[i],
+                            "is_correct": is_correct_list[i],
+                            "used_rules": [
+                                {
+                                    "sid": sid,
+                                    "distance": float(dist),
+                                    "content": content
+                                }
+                                for (content, dist, sid) in used_rag_data[i]
+                            ]
+                        }
+                        f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
                 # --- D. 批量反思与自生成经验 (只针对错题) ---
                 if incorrect_indices:
@@ -433,6 +455,36 @@ Summarize the rule:"""
         if gold is None or pred_num is None: return False
         return abs(gold - pred_num) < 1e-4
 
+    def cleanup(self):
+        """
+        显式释放 vLLM 资源和显存
+        """
+        print("🧹 正在清理显存和 vLLM 进程...")
+        if hasattr(self, 'llm'):
+            del self.llm
+        import gc
+        gc.collect()
+        torch.cuda.empty_cache()
+        
+        try:
+            import ray
+            if ray.is_initialized():
+                ray.shutdown()
+        except ImportError:
+            pass
+            
+        print("✅ 清理完成！")
+
 if __name__ == "__main__":
-    trainer = ReflexionTrainerFull()
-    trainer.run_full_evolution()
+    trainer = None
+    try:
+        trainer = ReflexionTrainerFull()
+        trainer.run_full_evolution()
+    except KeyboardInterrupt:
+        print("\n🛑 用户强制停止训练")
+    except Exception as e:
+        print(f"\n❌ 发生错误: {e}")
+        raise e
+    finally:
+        if trainer is not None:
+            trainer.cleanup()
