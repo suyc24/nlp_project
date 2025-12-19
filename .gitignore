@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+reflexion_model/reflexion_full_db/
+
+
+reflexion_model/reflexion_full_db/
