@@ -9,13 +9,9 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
+import yaml
+import argparse
 
-# ================= Configuration =================
-MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
-DB_PATH = "./reflexion_full_db"
-CHUNK_SIZE = 64         
-INFERENCE_BATCH_SIZE = 32 
-MAX_NEW_TOKENS = 256
 
 # ================= 1. Memory Manager =================
 class MemoryManager:
@@ -25,10 +21,17 @@ class MemoryManager:
     # - reset (bool): If True, clears the existing database at DB_PATH before initializing.
     # Purpose:
     # - Ensures a clean slate for the memory manager if reset is enabled.
-    def __init__(self, reset=False):
-        if reset and os.path.exists(DB_PATH):
-            shutil.rmtree(DB_PATH)
-        self.client = chromadb.PersistentClient(path=DB_PATH)
+    def __init__(self, config, reset=False):
+        self.config = config
+        self.MODEL_PATH = config["MODEL_PATH"]
+        self.DB_PATH = config["DB_PATH"]
+        self.CHUNK_SIZE = config["CHUNK_SIZE"]
+        self.INFERENCE_BATCH_SIZE = config["INFERENCE_BATCH_SIZE"]
+        self.MAX_NEW_TOKENS = config["MAX_NEW_TOKENS"]
+        self.EXIST_DIST_THRESHOLD = config["EXIST_DIST_THRESHOLD"]
+        if reset and os.path.exists(self.DB_PATH):
+            shutil.rmtree(self.DB_PATH)
+        self.client = chromadb.PersistentClient(path=self.DB_PATH)
         self.collection = self.client.get_or_create_collection(name="rule_book")
         
         self.skill_stats = {} 
@@ -80,7 +83,7 @@ class MemoryManager:
         for i, emb in enumerate(embeddings_A):
             try:
                 existing = self.collection.query(query_embeddings=[emb], n_results=1)
-                if existing['ids'] and existing['ids'][0] and existing['distances'][0][0] < 0.15: 
+                if existing['ids'] and existing['ids'][0] and existing['distances'][0][0] < self.EXIST_DIST_THRESHOLD: 
                     exist_id = existing['ids'][0][0]
                     if exist_id in self.skill_stats:
                         self.skill_stats[exist_id]['score'] = min(1.0, self.skill_stats[exist_id]['score'] + 0.05)
@@ -194,16 +197,22 @@ class MemoryManager:
 
 # ================= 2. Reflexion Trainer =================
 class ReflexionTrainerFull:
-    def __init__(self):
+    def __init__(self, config):
         print("🚀 Initializing training environment (RAG Only Mode)...")
         self.attn_impl = "sdpa"
         print(f"   -> Attention Implementation: {self.attn_impl}")
-
-        self.tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, padding_side="left")
+        self.config = config
+        self.MODEL_PATH = config["MODEL_PATH"]
+        self.DB_PATH = config["DB_PATH"]
+        self.CHUNK_SIZE = config["CHUNK_SIZE"]
+        self.INFERENCE_BATCH_SIZE = config["INFERENCE_BATCH_SIZE"]
+        self.MAX_NEW_TOKENS = config["MAX_NEW_TOKENS"]
+        self.EXIST_DIST_THRESHOLD = config["EXIST_DIST_THRESHOLD"]
+        self.tokenizer = AutoTokenizer.from_pretrained(self.MODEL_PATH, padding_side="left")
         if self.tokenizer.pad_token is None: self.tokenizer.pad_token = self.tokenizer.eos_token
         
         self.base_model = AutoModelForCausalLM.from_pretrained(
-            MODEL_NAME, 
+            self.MODEL_PATH, 
             torch_dtype=torch.float16, 
             device_map="auto",
             attn_implementation=self.attn_impl
@@ -212,7 +221,7 @@ class ReflexionTrainerFull:
         self.model.eval()
         
         self.embedder = SentenceTransformer('all-MiniLM-L6-v2', device="cuda" if torch.cuda.is_available() else "cpu")
-        self.memory = MemoryManager(reset=True)
+        self.memory = MemoryManager(config, reset=True)
 
     def batch_generate(self, prompts, temperature=0.5, max_new_tokens=256):
         inputs = self.tokenizer(prompts, return_tensors="pt", padding=True, truncation=True).to(self.model.device)
@@ -237,8 +246,8 @@ class ReflexionTrainerFull:
         
         print(f"🔥 Starting full evolution training...")
 
-        for chunk_start in range(0, total_len, CHUNK_SIZE):
-            chunk_end = min(chunk_start + CHUNK_SIZE, total_len)
+        for chunk_start in range(0, total_len, self.CHUNK_SIZE):
+            chunk_end = min(chunk_start + self.CHUNK_SIZE, total_len)
             chunk_indices = range(chunk_start, chunk_end)
             
             chunk_questions = [dataset[i]['question'] for i in chunk_indices]
@@ -271,9 +280,9 @@ class ReflexionTrainerFull:
             
             # --- 3. Batch Inference ---
             model_outputs = []
-            for i in range(0, len(inference_prompts), INFERENCE_BATCH_SIZE):
-                batch_prompts = inference_prompts[i : i + INFERENCE_BATCH_SIZE]
-                batch_outs = self.batch_generate(batch_prompts, max_new_tokens=MAX_NEW_TOKENS)
+            for i in range(0, len(inference_prompts), self.INFERENCE_BATCH_SIZE):
+                batch_prompts = inference_prompts[i : i + self.INFERENCE_BATCH_SIZE]
+                batch_outs = self.batch_generate(batch_prompts, max_new_tokens=self.MAX_NEW_TOKENS)
                 model_outputs.extend(batch_outs)
             
             # --- 4. Evaluation & Feedback Update ---
@@ -351,12 +360,12 @@ Format:
 
             # --- 6. Periodic Pruning ---
             pruned_count = 0
-            if (chunk_start // CHUNK_SIZE) % 5 == 0:
+            if (chunk_start // self.CHUNK_SIZE) % 5 == 0:
                 pruned_count = self.memory.prune_db(threshold=0.25)
 
             acc = len(correct_samples) / len(chunk_questions) * 100
             db_size = self.memory.collection.count()
-            print(f"Chunk {chunk_start//CHUNK_SIZE}: Acc={acc:.1f}% | DB={db_size} | Pruned={pruned_count}")
+            print(f"Chunk {chunk_start//self.CHUNK_SIZE}: Acc={acc:.1f}% | DB={db_size} | Pruned={pruned_count}")
 
         print("Full training completed!")
 
@@ -375,7 +384,15 @@ Format:
         pred_num = self.extract_number(pred)
         if gold is None or pred_num is None: return False
         return abs(gold - pred_num) < 1e-4
-
+    
+def load_config(path="config.yaml"):
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
+        
 if __name__ == "__main__":
-    trainer = ReflexionTrainerFull()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, default="config.yaml", help="YAML配置文件路径")
+    args = parser.parse_args()
+    config = load_config(args.config)
+    trainer = ReflexionTrainerFull(config)
     trainer.run_full_evolution()

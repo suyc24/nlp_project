@@ -12,3 +12,11 @@ debug_analysis.py是用来测样本的。
 测试流程：
 运行学习脚本:python step1_learning.py
 运行测试脚本:python step2_testing.py
+
+### run 
+#### reflection model 
+```bash
+python evolution_trainer.py --config /root/autodl-tmp/nlp_project/reflection_model/configurations/train_config.yaml
+python evaluate_notebook.py --config /root/autodl-tmp/nlp_project/reflection_model/configurations/evaluate_config.yaml
+```
+
