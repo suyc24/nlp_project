@@ -308,12 +308,12 @@ Answer step-by-step and give ONLY the final answer.
                     gt = chunk_answers[idx]
                     is_right = self.check_answer(pred, gt)
                     zs_is_correct.append(is_right)
-                    
-                    if is_right:
-                        epoch_correct_count += 1
-                    else:
+
+                    if not is_right:
                         incorrect_local_indices.append(idx)
                     epoch_total_count += 1
+                    
+                chunk_final_correct = zs_is_correct[:]
                 
                 # ================= 阶段 2: RAG 重算 (仅针对错题) =================
                 rag_usage_for_update = []
@@ -371,6 +371,8 @@ Answer step-by-step and give ONLY the final answer.
                         rag_outputs_for_update.append(pred)
                         
                         if not is_right:
+                            chunk_final_correct[incorrect_local_indices[k]] = True
+                        else:
                             still_incorrect_indices.append(incorrect_local_indices[k])
                     
                     # 5. 更新 Memory 分数 (仅针对使用了 RAG 的错题)
@@ -378,6 +380,7 @@ Answer step-by-step and give ONLY the final answer.
                     clean_usage = []
                     clean_correct = []
                     clean_outputs = []
+
                     final_usage = [rag_usage_for_update[k] for k in range(len(wrong_questions)) if rag_prompts[k] is not None]
                     
                     if final_usage:
@@ -437,10 +440,13 @@ Summarize the rule:"""
                         verified_strategies = []
                         
                         for m, pred in enumerate(verify_outputs):
+                            k_idx = temp_candidates[m][2]
                             orig_gt = verify_data[temp_candidates[m][2]][1]
                             if self.check_answer(pred, orig_gt):
                                 verified_patterns.append(temp_candidates[m][0])
                                 verified_strategies.append(temp_candidates[m][1])
+                                original_global_idx = still_incorrect_indices[k_idx]
+                                chunk_final_correct[original_global_idx] = True
                         
                         if verified_patterns:
                             p_embeds = self.embedder.encode(verified_patterns, convert_to_numpy=True).tolist()
@@ -450,13 +456,15 @@ Summarize the rule:"""
                 if (chunk_start // CHUNK_SIZE) % 5 == 0:
                     self.memory.prune_db(threshold=0.25)
 
+                epoch_correct_count += sum(chunk_final_correct)
+
                 # 更新进度条信息 (这里的 Accuracy 是 Zero-shot 的准确率)
-                batch_acc = len([x for x in zs_is_correct if x]) / len(chunk_questions) * 100
-                pbar.set_postfix({"ZS Acc": f"{batch_acc:.1f}%", "DB": self.memory.collection.count()})
+                batch_acc = sum(chunk_final_correct) / len(chunk_questions) * 100
+                pbar.set_postfix({"Total Acc": f"{batch_acc:.1f}%", "DB": self.memory.collection.count()})
             
             # --- Epoch 总结 ---
             current_epoch_acc = (epoch_correct_count / epoch_total_count) * 100
-            print(f"\n📊 Epoch {epoch} 完成 | Zero-shot 准确率: {current_epoch_acc:.2f}% (Target: {TARGET_ACCURACY}%)")
+            print(f"\n📊 Epoch {epoch} 完成 | 综合准确率 (ZS+RAG+Reflect): {current_epoch_acc:.2f}% (Target: {TARGET_ACCURACY}%)")
             
             if current_epoch_acc > best_acc:
                 best_acc = current_epoch_acc
