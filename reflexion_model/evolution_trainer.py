@@ -25,7 +25,7 @@ class ReflexionTrainerFull:
         
         # 标准推理参数
         self.params_inference = SamplingParams(
-            temperature=0.5, top_p=0.9, max_tokens=MAX_NEW_TOKENS,
+            temperature=0.2, top_p=0.9, max_tokens=MAX_NEW_TOKENS,
             stop=["<|im_end|>", "<|endoftext|>"]
         )
         # 反思参数 (高创造性)
@@ -36,6 +36,11 @@ class ReflexionTrainerFull:
         # 验证参数 (低容错)
         self.params_verify = SamplingParams(
             temperature=0.1, top_p=0.9, max_tokens=MAX_NEW_TOKENS,
+            stop=["<|im_end|>", "<|endoftext|>"]
+        )
+        # 抽象参数 (低长度)
+        self.params_abstract = SamplingParams(
+            temperature=0.5, top_p=0.9, max_tokens=64,
             stop=["<|im_end|>", "<|endoftext|>"]
         )
 
@@ -100,19 +105,23 @@ class ReflexionTrainerFull:
     def construct_prompt(self, q, context=None):
         if context:
             content = f"""
-        You may use the following abstract strategy ONLY if it is relevant.
-        Do NOT introduce new examples, sub-questions, or conditions.
+                [Reference Rules]
+                {context}
 
-        [STRATEGY]
-        {context}
+                [Question]
+                {q}
 
-        [QUESTION]
-        {q}
+                [Instruction]
+                1. Read the Reference Rules carefully.
+                2. First, decide which rule is relevant to the question.
+                3. If a rule is relevant, write "Selected Rule: [Rule Content]".
+                4. If no rule is relevant, write "No suitable rule found".
+                5. Then, solve the problem step-by-step using the selected rule (if any).
 
-        Answer step-by-step and give ONLY the final answer.
-        """
+                Answer:"""
         else:
             content = f"Question: {q}\nAnswer step-by-step:"
+            
         return f"<|im_start|>user\n{content}<|im_end|>\n<|im_start|>assistant\n"
 
     def verify_step_vllm(self, partial_prompt, gt, k=1):
@@ -206,7 +215,7 @@ class ReflexionTrainerFull:
                 1. **Trigger (A)**: A short, abstract description of the problem pattern (max 1 sentence).
                 2. **Strategy (B)**: A concise, step-by-step algorithm or formula using variables (X, Y, Z).
                 3. **FORBIDDEN**: Do NOT include words like "Explanation", "To avoid error", "The wrong solution did...".
-                4. **FORBIDDEN**: Do NOT use specific numbers from the question.
+                4. **FORBIDDEN**: Do NOT use any concrete numbers, specific object names, or named entities; use only abstract variables and generic terms.
 
                 [EXAMPLE OUTPUT]
                 **Trigger (A)**: Calculating total cost given quantity and unit rate.
@@ -307,7 +316,7 @@ class ReflexionTrainerFull:
 
     def run_full_evolution(self):
         # 1. 准备数据
-        dataset = load_dataset("gsm8k", "main")['train'].select(range(50)) 
+        dataset = load_dataset("gsm8k", "main")['train'].select(range(200)) 
         
         total_len = len(dataset)
         print(f"⚡️ 正在预计算 {total_len} 条问题的 Embedding (CPU Mode)...")
@@ -379,7 +388,14 @@ class ReflexionTrainerFull:
                     wrong_answers = [chunk_answers[i] for i in incorrect_local_indices]
                     
                     # 2. 检索规则
-                    retrieved_batch = self.memory.batch_retrieve(wrong_embeddings, top_k=3, threshold=0.6)
+                    print(f"    🧠 Abstracting {len(wrong_questions)} questions for better retrieval...")
+                    abstract_intent_list = self.batch_abstract_for_retrieval(wrong_questions)
+
+                    # 2. 对“抽象描述”进行 Embedding，而不是对原题 Embedding
+                    query_embeddings = self.embedder.encode(abstract_intent_list, convert_to_numpy=True).tolist()
+                    
+                    # 3. 使用抽象 Embedding 进行检索
+                    retrieved_batch = self.memory.batch_retrieve(query_embeddings, top_k=3, threshold=0.6)
                     
                     rag_prompts = []
                     
@@ -388,7 +404,7 @@ class ReflexionTrainerFull:
                         rules_list = retrieved_batch[k]
                         
                         if rules_list:
-                            context_text = "\n".join([f"- {r[0]}" for r in rules_list])
+                            context_text = "\n".join([f"[Rule {i+1}]: {r[0]}" for i, r in enumerate(rules_list)])
                             rag_prompts.append(self.construct_prompt(q, context_text))
                             rag_usage_for_update.append(rules_list)
                             rag_rules_map[original_idx] = [r[0] for r in rules_list]
@@ -478,6 +494,30 @@ class ReflexionTrainerFull:
                 break
             else:
                 print("🔄 表现未达标，继续下一轮训练...")
+
+    def batch_abstract_for_retrieval(self, questions):
+        """
+        将具体问题转化为抽象的数学考点描述，用于检索。
+        """
+        prompts = []
+        for q in questions:
+            content = f"""
+            Task: Identify the core mathematical concept and intent of the following problem.
+            Output a concise, abstract description (1 sentence).
+            Do NOT include specific numbers or proper names.
+
+            [Example]
+            Q: John has 5 apples and buys 3 more. How many?
+            A: Calculating the total sum of objects using addition.
+
+            [Target]
+            Q: {q}
+            A:"""
+            prompts.append(f"<|im_start|>user\n{content}<|im_end|>\n<|im_start|>assistant\n")
+        
+        abstract_queries = self.batch_generate_vllm(prompts, self.params_abstract)
+        
+        return abstract_queries
 
     def extract_number(self, text):
         if not text: return None

@@ -18,7 +18,7 @@ CHUNK_SIZE = 64          # 处理单元大小
 MAX_NEW_TOKENS = 256
 GPU_MEMORY_UTILIZATION = 0.90 
 TARGET_ACCURACY = 75.0   # 目标准确率
-MAX_EPOCHS = 5           # 最大训练轮数
+MAX_EPOCHS = 10           # 最大训练轮数
 
 # 日志路径
 RAG_LOG_PATH = "rag_usage_log.jsonl"
