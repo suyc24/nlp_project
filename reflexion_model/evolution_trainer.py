@@ -40,13 +40,13 @@ class ReflexionTrainerFull:
         )
         # 抽象参数 (低长度)
         self.params_abstract = SamplingParams(
-            temperature=0.5, top_p=0.9, max_tokens=64,
+            temperature=0.0, top_p=0.9, max_tokens=64,
             stop=["<|im_end|>", "<|endoftext|>"]
         )
 
         print("   -> Loading Embedder (Force CPU to save GPU memory)...")
         self.embedder = SentenceTransformer('all-MiniLM-L6-v2', device="cpu", cache_folder=HF_CACHE_DIR)       
-        self.memory = MemoryManager(reset=True)
+        self.memory = MemoryManager(reset=False)
         self.debug_log_path = "debug_trace.jsonl"
         open(self.debug_log_path, "w").close() 
         
@@ -316,7 +316,7 @@ class ReflexionTrainerFull:
 
     def run_full_evolution(self):
         # 1. 准备数据
-        dataset = load_dataset("gsm8k", "main")['train'].select(range(200)) 
+        dataset = load_dataset("gsm8k", "main")['train']
         
         total_len = len(dataset)
         print(f"⚡️ 正在预计算 {total_len} 条问题的 Embedding (CPU Mode)...")
@@ -474,10 +474,12 @@ class ReflexionTrainerFull:
                     self.memory.prune_db(threshold=0.25)
 
                 epoch_correct_count += sum(chunk_final_correct)
+                if epoch_total_count > 0:
+                    cum_acc = (epoch_correct_count / epoch_total_count) * 100
+                else:
+                    cum_acc = 0.0
 
-                # 更新进度条信息 (ZS+RAG Accuracy)
-                batch_acc = sum(chunk_final_correct) / len(chunk_questions) * 100
-                pbar.set_postfix({"Acc(ZS+RAG)": f"{batch_acc:.1f}%", "DB": self.memory.collection.count()})
+                pbar.set_postfix({"Acc(ZS+RAG)": f"{cum_acc:.1f}%", "DB": self.memory.collection.count()})
             
             # --- Epoch 总结 ---
             current_epoch_acc = (epoch_correct_count / epoch_total_count) * 100

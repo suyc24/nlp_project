@@ -12,13 +12,13 @@ os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 
 # ================= 训练参数配置 =================
-MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct-AWQ"
+MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct-AWQ"
 DB_PATH = "./reflexion_full_db"
 CHUNK_SIZE = 64          # 处理单元大小
-MAX_NEW_TOKENS = 256
+MAX_NEW_TOKENS = 1024
 GPU_MEMORY_UTILIZATION = 0.90 
 TARGET_ACCURACY = 75.0   # 目标准确率
-MAX_EPOCHS = 10           # 最大训练轮数
+MAX_EPOCHS = 5           # 最大训练轮数
 
 # 日志路径
 RAG_LOG_PATH = "rag_usage_log.jsonl"
