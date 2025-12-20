@@ -1,10 +1,9 @@
-from config import * 
+from config_eval import * 
 import os
 import re
 import time
 import torch
-import argparse
-import yaml
+
 import chromadb
 from collections import Counter
 from datasets import load_dataset
@@ -14,10 +13,8 @@ from tqdm import tqdm
 
 # ================= 1. 记忆管理器 (保持不变) =================
 class MemoryManager:
-    def __init__(self, config):
-        self.config = config
-        self.DB_PATH = config["DB_PATH"]
-        self.RAG_THRESHOLD = config["RAG_THRESHOLD"]
+    def __init__(self):
+        self.DB_PATH = DB_PATH
         self.client = chromadb.PersistentClient(path=self.DB_PATH)
         self.collection = self.client.get_collection(name="rule_book")
         
@@ -42,16 +39,15 @@ class MemoryManager:
 
 # ================= 2. 科学对比评估器 (完整修改版) =================
 class ScientificComparator:
-    def __init__(self, config):
+    def __init__(self):
         print(f"🚀 初始化 vLLM 引擎 (Rigorous Mode)...")
-        self.config = config
-        self.MODEL_PATH = config["MODEL_PATH"]
-        self.DB_PATH = config["DB_PATH"]
-        self.GPU_UTILIZATION = config["GPU_UTILIZATION"]
-        self.TOP_K = config["TOP_K"]
-        self.SC_PATHS = config["SC_PATHS"]  
+        self.MODEL_PATH = MODEL_NAME
+        self.DB_PATH = DB_PATH
+        self.GPU_UTILIZATION = GPU_MEMORY_UTILIZATION
+        self.TOP_K = TOP_K
+        self.SC_PATHS = SC_PATHS 
         # [修改] 收紧阈值，只有非常匹配的规则才启用 RAG，防止噪音干扰
-        self.RAG_THRESHOLD = 0.35  # 建议设为 0.35 或 0.4，越小越严
+        self.RAG_THRESHOLD = RAG_THRESHOLD  # 建议设为 0.35 或 0.4，越小越严
         
         self.llm = LLM(
             model=self.MODEL_PATH, 
@@ -79,7 +75,7 @@ class ScientificComparator:
 
         print("📥 加载 Embedder (CPU)...")
         self.embedder = SentenceTransformer('all-MiniLM-L6-v2', device="cpu")
-        self.memory = MemoryManager(config)
+        self.memory = MemoryManager()
 
     def construct_base_prompt(self, question):
         # 标准 CoT Prompt
@@ -253,18 +249,12 @@ A:"""
             print("结论：仍然有下降？请检查 RAG Prompt 是否干扰了模型。")
         print("="*60)
 
-def load_config(path="configurations/evaluate.yaml"):
-    with open(path, "r") as f:
-        return yaml.safe_load(f)
-    
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default="configurations/evaluate.yaml", help="YAML配置文件路径")
-    args = parser.parse_args()
-    config = load_config(args.config)
+
     
     try:
-        evaluator = ScientificComparator(config)
+        evaluator = ScientificComparator()
         evaluator.run_scientific_test()
     except KeyboardInterrupt:
         print("\n🛑 评估被用户中断")
