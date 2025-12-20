@@ -26,8 +26,8 @@ DB_PATH = "./reflexion_full_db"
 CHUNK_SIZE = 64  # 处理单元大小
 MAX_NEW_TOKENS = 256
 GPU_MEMORY_UTILIZATION = 0.90 
-TARGET_ACCURACY = 92.0  # [修改] 目标准确率，达到后停止训练
-MAX_EPOCHS = 5        # [修改] 最大训练轮数，防止死循环
+TARGET_ACCURACY = 75.0  # 目标准确率，达到后停止训练
+MAX_EPOCHS = 5       # 最大训练轮数，防止死循环
 
 # ================= 1. 记忆管理器 (保持不变) =================
 class MemoryManager:
@@ -171,14 +171,17 @@ class ReflexionTrainerFull:
             download_dir=HF_CACHE_DIR
         )
         
+        # 标准推理参数
         self.params_inference = SamplingParams(
             temperature=0.5, top_p=0.9, max_tokens=MAX_NEW_TOKENS,
             stop=["<|im_end|>", "<|endoftext|>"]
         )
+        # 反思参数 (高创造性)
         self.params_reflection = SamplingParams(
             temperature=0.7, top_p=0.9, max_tokens=MAX_NEW_TOKENS,
             stop=["<|im_end|>", "<|endoftext|>"]
         )
+        # 验证参数 (低容错)
         self.params_verify = SamplingParams(
             temperature=0.1, top_p=0.9, max_tokens=MAX_NEW_TOKENS,
             stop=["<|im_end|>", "<|endoftext|>"]
@@ -190,7 +193,14 @@ class ReflexionTrainerFull:
         self.memory = MemoryManager(reset=True)
 
         self.rag_log_path = "rag_usage_log.jsonl"
+        self.debug_log_path = "debug_trace.jsonl"
         open(self.rag_log_path, "w").close() 
+        open(self.debug_log_path, "w").close() 
+        
+    def log_debug(self, data):
+        import json
+        with open(self.debug_log_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(data, ensure_ascii=False) + "\n")
 
     def batch_generate_vllm(self, prompts, sampling_params):
         outputs = self.llm.generate(prompts, sampling_params, use_tqdm=False)
@@ -257,6 +267,180 @@ Answer step-by-step and give ONLY the final answer.
             content = f"Question: {q}\nAnswer step-by-step:"
         return f"<|im_start|>user\n{content}<|im_end|>\n<|im_start|>assistant\n"
 
+    def verify_step_vllm(self, partial_prompt, gt, k=1):
+        """
+        验证当前步骤是否正确。
+        Prompt 构造逻辑：给定前面的步骤，询问最后一步是否与 Ground Truth 矛盾。
+        """
+        # 构造验证 Prompt
+        verify_content = f"""
+I am solving a math problem.
+[Previous Steps]
+{partial_prompt.replace('<|im_start|>user', '').replace('<|im_start|>assistant', '').strip()}
+
+[Ground Truth Answer]
+{gt}
+
+Evaluate ONLY the last step provided above.
+Is this step logically correct and consistent with leading to the Ground Truth?
+Answer strictly "Yes" or "No".
+"""
+        full_prompt = f"<|im_start|>user\n{verify_content}<|im_end|>\n<|im_start|>assistant\n"
+        
+        # 这里的 k 参数如果是为了多次采样验证，可以在这里扩展，目前简化为一次
+        outputs = self.batch_generate_vllm([full_prompt], self.params_verify)
+        resp = outputs[0].lower()
+        
+        return "yes" in resp and "no" not in resp
+
+    def self_explore_phase(self, epoch, still_incorrect_indices, chunk_questions, chunk_answers, index_to_rules=None):
+        """
+        [极速版] Self-Explore 机制：
+        1. Hindsight: 强制生成正确路径 (Batch)
+        2. Contrast: 对比生成规则 (Batch)
+        3. Verification: 收集所有候选规则一次性并行验证 (Batch) -> 速度最快
+        """
+        if not still_incorrect_indices:
+            return
+
+        print(f" 🔍 Self-Exploring {len(still_incorrect_indices)} samples (Batch Optimized)...")
+        
+        # 1. 准备数据
+        target_questions = [chunk_questions[i] for i in still_incorrect_indices]
+        target_answers = [chunk_answers[i] for i in still_incorrect_indices]
+        
+        # ==========================================================
+        # 步骤 1: Batch 生成 "错误路径" & "正确路径"
+        # ==========================================================
+        # 1.1 错误路径
+        prompts_wrong = [self.construct_prompt(q) for q in target_questions]
+        traces_wrong = self.batch_generate_vllm(prompts_wrong, self.params_inference)
+
+        # 1.2 正确路径 (Hindsight)
+        prompts_correct = []
+        for q, gt in zip(target_questions, target_answers):
+            hindsight_prompt = (
+                f"Question: {q}\n"
+                f"The correct answer is known to be: {gt}.\n"
+                f"Please provide a correct, step-by-step mathematical derivation that results in this answer.\n"
+                f"Answer step-by-step:"
+            )
+            prompts_correct.append(f"<|im_start|>user\n{hindsight_prompt}<|im_end|>\n<|im_start|>assistant\n")
+            
+        traces_correct = self.batch_generate_vllm(prompts_correct, self.params_inference)
+
+        # ==========================================================
+        # 步骤 2: Batch 生成 "对比反思"
+        # ==========================================================
+        contrast_prompts = []
+        # 记录 contrast_prompts 中每个 prompt 对应的原始问题索引，方便后续解析
+        contrast_metadata_map = [] 
+
+        for i in range(len(target_questions)):
+            q = target_questions[i]
+            gt = target_answers[i]
+            w_trace = traces_wrong[i]
+            c_trace = traces_correct[i]
+            
+            # 只有当 "错误路径真的错了" 且 "正确路径真的对了" 时才生成
+            if not self.check_answer(w_trace, gt) and self.check_answer(c_trace, gt):
+                contrast_content = f"""
+I will provide a Question, a Wrong Solution (Attempt), and a Correct Solution.
+Your task is to compare them and extract a general mathematical principle that fixes the logical error.
+
+[Question]
+{q}
+
+[Wrong Solution]
+{w_trace}
+
+[Correct Solution]
+{c_trace}
+
+[TASK]
+1. Identify the specific logic error in the Wrong Solution compared to the Correct Solution.
+2. Formulate a general rule (Trigger + Strategy) to avoid this error.
+3. **CRITICAL**: Use variables (X, Y, Z) instead of specific numbers from the question.
+
+STRICT OUTPUT FORMAT:
+**Trigger (A)**: [Describe the problem type or condition]
+**Strategy (B)**: [Describe the correct method abstractly]
+"""
+                contrast_prompts.append(f"<|im_start|>user\n{contrast_content}<|im_end|>\n<|im_start|>assistant\n")
+                contrast_metadata_map.append(i)
+        
+        if not contrast_prompts:
+            return
+
+        reflections = self.batch_generate_vllm(contrast_prompts, self.params_reflection)
+
+        # ==========================================================
+        # 步骤 3: 解析规则 & 准备批量验证 (关键优化点)
+        # ==========================================================
+        
+        verify_prompts = []
+        verify_candidates_metadata = []
+
+        for idx, reflection_text in enumerate(reflections):
+            original_idx = contrast_metadata_map[idx]
+            q = target_questions[original_idx]
+            gt = target_answers[original_idx]
+            
+            parsed = self.parse_reflection(reflection_text)
+            if not parsed: continue
+            trigger, strategy = parsed
+            
+            if self.has_specific_numbers(strategy, q): continue
+            if len(strategy) < 10: continue
+
+            v_prompt = self.construct_prompt(q, context=strategy)
+            verify_prompts.append(v_prompt)
+            
+            # 记录元数据，等会儿验证完了一一对应
+            verify_candidates_metadata.append({
+                "trigger": trigger,
+                "strategy": strategy,
+                "gt": gt
+            })
+
+        # ==========================================================
+        # 步骤 4: 批量并行验证 (Batch Verification)
+        # ==========================================================
+        if not verify_prompts:
+            return
+
+        # 🚀 只有一次 vLLM 调用，效率最高
+        verify_outputs = self.batch_generate_vllm(verify_prompts, self.params_verify)
+
+        new_patterns = []
+        new_strategies = []
+        new_embeddings_inputs = []
+
+        # 检查验证结果
+        for i, pred in enumerate(verify_outputs):
+            meta = verify_candidates_metadata[i]
+            gt = meta["gt"]
+            
+            if self.check_answer(pred, gt):
+                # 验证通过！
+                self.log_debug({
+                    "epoch": epoch,
+                    "phase": "rule_verified",
+                    "trigger": meta["trigger"],
+                    "strategy": meta["strategy"],
+                    "question": q,
+                    "gt": gt
+                })
+                print(f"    ✅ Rule Verified: {meta['trigger'][:40]}... -> {meta['strategy'][:40]}...")
+                new_patterns.append(meta["trigger"])
+                new_strategies.append(meta["strategy"])
+                new_embeddings_inputs.append(meta["trigger"])
+
+        if new_patterns:
+            print(f" 💾 Adding {len(new_patterns)} high-quality rules to memory...")
+            embeddings = self.embedder.encode(new_embeddings_inputs, convert_to_numpy=True)
+            self.memory.add_experience_batch(new_patterns, new_strategies, embeddings)
+
     def run_full_evolution(self):
         # 1. 准备数据
         dataset = load_dataset("gsm8k", "main")['train'].select(range(200)) 
@@ -311,17 +495,26 @@ Answer step-by-step and give ONLY the final answer.
 
                     if not is_right:
                         incorrect_local_indices.append(idx)
+                        self.log_debug({
+                            "epoch": epoch,
+                            "phase": "zero_shot",
+                            "question": chunk_questions[idx],
+                            "pred": pred,
+                            "gt": gt
+                        })
                     epoch_total_count += 1
-                    
+
                 chunk_final_correct = zs_is_correct[:]
                 
                 # ================= 阶段 2: RAG 重算 (仅针对错题) =================
                 rag_usage_for_update = []
                 rag_is_correct_for_update = []
-                rag_outputs_for_update = []
+                rag_outputs_for_update = []              
+                still_incorrect_indices = []   # RAG 后依然做错的下标，用于 Self-Explore
                 
-                still_incorrect_indices = []   # RAG 后依然做错的下标，用于反思
-                
+                # 用于记录每道错题用了什么规则，传给 Self-Explore 打印日志
+                rag_rules_map = {} 
+
                 if incorrect_local_indices:
                     # 1. 准备错题数据
                     wrong_questions = [chunk_questions[i] for i in incorrect_local_indices]
@@ -332,21 +525,21 @@ Answer step-by-step and give ONLY the final answer.
                     retrieved_batch = self.memory.batch_retrieve(wrong_embeddings, top_k=3, threshold=0.4)
                     
                     rag_prompts = []
-                    valid_rag_indices_map = [] # 记录有规则的错题对应的是哪个 local index
                     
                     for k, q in enumerate(wrong_questions):
+                        original_idx = incorrect_local_indices[k]
                         rules_list = retrieved_batch[k]
+                        
                         if rules_list:
                             context_text = "\n".join([f"- {r[0]}" for r in rules_list])
                             rag_prompts.append(self.construct_prompt(q, context_text))
-                            # 记录数据以便后续 update_score
                             rag_usage_for_update.append(rules_list)
-                            valid_rag_indices_map.append(k)
+                            rag_rules_map[original_idx] = [r[0] for r in rules_list]
                         else:
-                            # 如果没检索到规则，就没必要 RAG 重算了，直接视为依然错误
-                            rag_usage_for_update.append([]) # 空规则占位，不参与更新但保持索引对齐
-                            rag_prompts.append(None) # 占位
-                            still_incorrect_indices.append(incorrect_local_indices[k])
+                            # 如果没检索到规则，就没必要 RAG 重算了
+                            rag_usage_for_update.append([]) 
+                            rag_prompts.append(None) 
+                            still_incorrect_indices.append(original_idx)
 
                     # 3. 执行 RAG 推理 (只推理有 Prompts 的部分)
                     real_rag_prompts = [p for p in rag_prompts if p is not None]
@@ -355,9 +548,19 @@ Answer step-by-step and give ONLY the final answer.
                     
                     # 4. 评估 RAG 结果并准备 Update 数据
                     output_cursor = 0
+                    self.log_debug({
+                        "epoch": epoch,
+                        "phase": "rag",
+                        "question": q,
+                        "used_rules": rag_rules_map.get(original_idx, []),
+                        "pred": pred,
+                        "gt": gt,
+                        "is_correct": is_right
+                    })
                     for k, q in enumerate(wrong_questions):
+                        original_idx = incorrect_local_indices[k]
+                        
                         if rag_prompts[k] is None:
-                            # 没规则，跳过 Update，直接判定为 Refection 候选
                             continue
                             
                         pred = real_rag_outputs[output_cursor]
@@ -370,87 +573,26 @@ Answer step-by-step and give ONLY the final answer.
                         rag_is_correct_for_update.append(is_right)
                         rag_outputs_for_update.append(pred)
                         
-                        if not is_right:
-                            chunk_final_correct[incorrect_local_indices[k]] = True
+                        if is_right:
+                            chunk_final_correct[original_idx] = True
                         else:
-                            still_incorrect_indices.append(incorrect_local_indices[k])
+                            still_incorrect_indices.append(original_idx)
                     
-                    # 5. 更新 Memory 分数 (仅针对使用了 RAG 的错题)
-                    # 注意：这里需要过滤掉 rag_usage_for_update 中的空列表，虽然 update_scores_batch 内部也会跳过空列表，但为了对齐 is_correct_list 最好清洗一下
-                    clean_usage = []
-                    clean_correct = []
-                    clean_outputs = []
-
+                    # 5. 更新 Memory 分数
                     final_usage = [rag_usage_for_update[k] for k in range(len(wrong_questions)) if rag_prompts[k] is not None]
                     
                     if final_usage:
                         self.memory.update_scores_batch(final_usage, rag_is_correct_for_update, rag_outputs_for_update)
 
-                # ================= 阶段 3: 反思 (仅针对 RAG 后依然错误的题) =================
+                # ================= 阶段 3: Self-Explore (仅针对 RAG 后依然错误的题) =================
                 if still_incorrect_indices:
-                    reflect_prompts = []
-                    verify_data = [] 
-                    
-                    for idx in still_incorrect_indices:
-                        q = chunk_questions[idx]
-                        gt = chunk_answers[idx]
-                        
-                        p_content = f"""Task: Extract a general math rule from the incorrect problem.
-STRICT FORMAT INSTRUCTION:
-1. Do NOT print "Sure", "Here is", or any conversational filler.
-2. Do NOT use markdown code blocks.
-3. Start directly with "**Trigger (A)**".
-4. Use variables like X, Y, Z instead of specific numbers.
-5. STOP after providing the Strategy.
-[EXAMPLE]
-Problem: John buys 5 apples for $2 each. Total cost?
-Solution: 5 * 2 = 10.
-**Trigger (A)**: Calculating total cost from quantity and rate.
-**Strategy (B)**: Total Cost = Quantity * Unit Price.
-[YOUR TURN]
-Problem: {q}
-Solution: {gt}
-Summarize the rule:"""
-                        reflect_prompts.append(f"<|im_start|>user\n{p_content}<|im_end|>\n<|im_start|>assistant\n")
-                        verify_data.append((q, gt))
-                    
-                    # 生成反思
-                    reflections = self.batch_generate_vllm(reflect_prompts, self.params_reflection)
-                    
-                    temp_candidates = []
-                    for k, text in enumerate(reflections):
-                        parsed = self.parse_reflection(text)
-                        if parsed:
-                            p_text, s_text = parsed
-                            orig_q = verify_data[k][0]
-                            if self.has_specific_numbers(s_text, orig_q): continue 
-                            temp_candidates.append((p_text, s_text, k))
-                    
-                    # 验证反思
-                    if temp_candidates:
-                        verify_prompts = []
-                        for p_text, s_text, k in temp_candidates:
-                            orig_q = verify_data[k][0]
-                            vp_content = f"Rule: {s_text}\nQuestion: {orig_q}\nAnswer step-by-step:"
-                            verify_prompts.append(f"<|im_start|>user\n{vp_content}<|im_end|>\n<|im_start|>assistant\n")
-                        
-                        verify_outputs = self.batch_generate_vllm(verify_prompts, self.params_verify)
-                        
-                        verified_patterns = []
-                        verified_strategies = []
-                        
-                        for m, pred in enumerate(verify_outputs):
-                            k_idx = temp_candidates[m][2]
-                            orig_gt = verify_data[temp_candidates[m][2]][1]
-                            if self.check_answer(pred, orig_gt):
-                                verified_patterns.append(temp_candidates[m][0])
-                                verified_strategies.append(temp_candidates[m][1])
-                                original_global_idx = still_incorrect_indices[k_idx]
-                                chunk_final_correct[original_global_idx] = True
-                        
-                        if verified_patterns:
-                            p_embeds = self.embedder.encode(verified_patterns, convert_to_numpy=True).tolist()
-                            self.memory.add_experience_batch(verified_patterns, verified_strategies, p_embeds)
+                    self.self_explore_phase(
+                        epoch,
+                        still_incorrect_indices, 
+                        chunk_questions, 
+                        chunk_answers, 
+                        index_to_rules=rag_rules_map
+                    )
 
                 # --- 定期淘汰 ---
                 if (chunk_start // CHUNK_SIZE) % 5 == 0:
@@ -458,13 +600,13 @@ Summarize the rule:"""
 
                 epoch_correct_count += sum(chunk_final_correct)
 
-                # 更新进度条信息 (这里的 Accuracy 是 Zero-shot 的准确率)
+                # 更新进度条信息 (ZS+RAG Accuracy)
                 batch_acc = sum(chunk_final_correct) / len(chunk_questions) * 100
-                pbar.set_postfix({"Total Acc": f"{batch_acc:.1f}%", "DB": self.memory.collection.count()})
+                pbar.set_postfix({"Acc(ZS+RAG)": f"{batch_acc:.1f}%", "DB": self.memory.collection.count()})
             
             # --- Epoch 总结 ---
             current_epoch_acc = (epoch_correct_count / epoch_total_count) * 100
-            print(f"\n📊 Epoch {epoch} 完成 | 综合准确率 (ZS+RAG+Reflect): {current_epoch_acc:.2f}% (Target: {TARGET_ACCURACY}%)")
+            print(f"\n📊 Epoch {epoch} 完成 | 综合准确率 (ZS+RAG): {current_epoch_acc:.2f}% (Target: {TARGET_ACCURACY}%)")
             
             if current_epoch_acc > best_acc:
                 best_acc = current_epoch_acc

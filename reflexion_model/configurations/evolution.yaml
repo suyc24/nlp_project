@@ -1,4 +1,4 @@
-MODEL_PATH: "Qwen/Qwen2.5-7B-Instruct"
+MODEL_PATH: "Qwen/Qwen2.5-7B-Instruct-AWQ"
 DB_PATH: "./reflexion_full_db"
 CHUNK_SIZE: 64         
 INFERENCE_BATCH_SIZE: 32 

@@ -14,8 +14,8 @@ import chromadb
 from vllm import LLM, SamplingParams
 import time
 import argparse
-import yaml
 
+import yaml
 
 # ================= 1. 记忆管理器 (不变) =================
 class MemoryManager:
@@ -72,7 +72,7 @@ class ScientificComparator:
         # 无论是 Base 还是 RAG，都给予 5 次机会进行投票
         self.params_sc = SamplingParams(
             n=self.SC_PATHS, 
-            temperature=0.7, 
+            temperature=0.3, 
             top_p=0.9, 
             max_tokens=256,
             stop=["<|endoftext|>", "<|im_end|>", "Question:"]
@@ -195,13 +195,13 @@ Answer:<|im_end|>
             print("结论：RAG 未能带来正向收益，可能是检索噪音过大或模型未能有效利用提示。")
         print("="*60)
 
-def load_config(path="config.yaml"):
+def load_config(path="configurations/evaluate.yaml"):
     with open(path, "r") as f:
         return yaml.safe_load(f)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default="config.yaml", help="YAML配置文件路径")
+    parser.add_argument('--config', type=str, default="configurations/evaluate.yaml", help="YAML配置文件路径")
     args = parser.parse_args()
     config = load_config(args.config)
     evaluator = ScientificComparator(config)
