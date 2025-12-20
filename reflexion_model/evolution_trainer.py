@@ -7,7 +7,7 @@ from tqdm import tqdm
 from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
 from vllm import LLM, SamplingParams
-from memory_manager import MemoryManager
+from principle_manager import MemoryManager
 
 # ================= vLLM 进化训练器 (主要修改区域) =================
 class ReflexionTrainerFull:
@@ -307,7 +307,7 @@ class ReflexionTrainerFull:
 
     def run_full_evolution(self):
         # 1. 准备数据
-        dataset = load_dataset("gsm8k", "main")['train'].select(range(50)) 
+        dataset = load_dataset("gsm8k", "main")['train'].select(range(200)) 
         
         total_len = len(dataset)
         print(f"⚡️ 正在预计算 {total_len} 条问题的 Embedding (CPU Mode)...")
