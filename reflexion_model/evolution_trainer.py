@@ -40,13 +40,9 @@ class ReflexionTrainerFull:
         )
 
         print("   -> Loading Embedder (Force CPU to save GPU memory)...")
-        self.embedder = SentenceTransformer('all-MiniLM-L6-v2', device="cpu", cache_folder=HF_CACHE_DIR)
-        
+        self.embedder = SentenceTransformer('all-MiniLM-L6-v2', device="cpu", cache_folder=HF_CACHE_DIR)       
         self.memory = MemoryManager(reset=True)
-
-        self.rag_log_path = "rag_usage_log.jsonl"
         self.debug_log_path = "debug_trace.jsonl"
-        open(self.rag_log_path, "w").close() 
         open(self.debug_log_path, "w").close() 
         
     def log_debug(self, data):
@@ -96,7 +92,7 @@ class ReflexionTrainerFull:
             s_text = re.sub(r"\s+", " ", s_text)
 
             if len(t_text) < 5 or len(s_text) < 5: return None
-            if len(t_text) > 200: t_text = t_text[:200] 
+            if len(t_text) > 300: t_text = t_text[:300] 
             if "Strategy" in t_text: t_text = t_text.split("Strategy")[0].strip()
             return t_text, s_text
         return None
@@ -104,17 +100,17 @@ class ReflexionTrainerFull:
     def construct_prompt(self, q, context=None):
         if context:
             content = f"""
-You may use the following abstract strategy ONLY if it is relevant.
-Do NOT introduce new examples, sub-questions, or conditions.
+        You may use the following abstract strategy ONLY if it is relevant.
+        Do NOT introduce new examples, sub-questions, or conditions.
 
-[STRATEGY]
-{context}
+        [STRATEGY]
+        {context}
 
-[QUESTION]
-{q}
+        [QUESTION]
+        {q}
 
-Answer step-by-step and give ONLY the final answer.
-"""
+        Answer step-by-step and give ONLY the final answer.
+        """
         else:
             content = f"Question: {q}\nAnswer step-by-step:"
         return f"<|im_start|>user\n{content}<|im_end|>\n<|im_start|>assistant\n"
@@ -126,17 +122,17 @@ Answer step-by-step and give ONLY the final answer.
         """
         # 构造验证 Prompt
         verify_content = f"""
-I am solving a math problem.
-[Previous Steps]
-{partial_prompt.replace('<|im_start|>user', '').replace('<|im_start|>assistant', '').strip()}
+        I am solving a math problem.
+        [Previous Steps]
+        {partial_prompt.replace('<|im_start|>user', '').replace('<|im_start|>assistant', '').strip()}
 
-[Ground Truth Answer]
-{gt}
+        [Ground Truth Answer]
+        {gt}
 
-Evaluate ONLY the last step provided above.
-Is this step logically correct and consistent with leading to the Ground Truth?
-Answer strictly "Yes" or "No".
-"""
+        Evaluate ONLY the last step provided above.
+        Is this step logically correct and consistent with leading to the Ground Truth?
+        Answer strictly "Yes" or "No".
+        """
         full_prompt = f"<|im_start|>user\n{verify_content}<|im_end|>\n<|im_start|>assistant\n"
         
         # 这里的 k 参数如果是为了多次采样验证，可以在这里扩展，目前简化为一次
@@ -150,25 +146,23 @@ Answer strictly "Yes" or "No".
         [极速版] Self-Explore 机制：
         1. Hindsight: 强制生成正确路径 (Batch)
         2. Contrast: 对比生成规则 (Batch)
-        3. Verification: 收集所有候选规则一次性并行验证 (Batch) -> 速度最快
+        3. Verification: 收集所有候选规则一次性并行验证 (Batch)
         """
         if not still_incorrect_indices:
             return
 
-        print(f" 🔍 Self-Exploring {len(still_incorrect_indices)} samples (Batch Optimized)...")
-        
+        tqdm.write(f" 🔍 Self-Exploring {len(still_incorrect_indices)} samples (Batch Optimized)...")
+
         # 1. 准备数据
         target_questions = [chunk_questions[i] for i in still_incorrect_indices]
         target_answers = [chunk_answers[i] for i in still_incorrect_indices]
-        
+
         # ==========================================================
-        # 步骤 1: Batch 生成 "错误路径" & "正确路径"
+        # Step 1: 错误路径 & 正确路径
         # ==========================================================
-        # 1.1 错误路径
         prompts_wrong = [self.construct_prompt(q) for q in target_questions]
         traces_wrong = self.batch_generate_vllm(prompts_wrong, self.params_inference)
 
-        # 1.2 正确路径 (Hindsight)
         prompts_correct = []
         for q, gt in zip(target_questions, target_answers):
             hindsight_prompt = (
@@ -178,112 +172,129 @@ Answer strictly "Yes" or "No".
                 f"Answer step-by-step:"
             )
             prompts_correct.append(f"<|im_start|>user\n{hindsight_prompt}<|im_end|>\n<|im_start|>assistant\n")
-            
+
         traces_correct = self.batch_generate_vllm(prompts_correct, self.params_inference)
 
         # ==========================================================
-        # 步骤 2: Batch 生成 "对比反思"
+        # Step 2: Contrast 反思
         # ==========================================================
         contrast_prompts = []
-        # 记录 contrast_prompts 中每个 prompt 对应的原始问题索引，方便后续解析
-        contrast_metadata_map = [] 
+        contrast_metadata_map = []
 
         for i in range(len(target_questions)):
             q = target_questions[i]
             gt = target_answers[i]
             w_trace = traces_wrong[i]
             c_trace = traces_correct[i]
-            
-            # 只有当 "错误路径真的错了" 且 "正确路径真的对了" 时才生成
+
             if not self.check_answer(w_trace, gt) and self.check_answer(c_trace, gt):
                 contrast_content = f"""
-I will provide a Question, a Wrong Solution (Attempt), and a Correct Solution.
-Your task is to compare them and extract a general mathematical principle that fixes the logical error.
+                [TASK]
+                Compare the Wrong Solution and Correct Solution to identify the logic gap.
+                Define a general mathematical rule to solve this type of problem correctly.
 
-[Question]
-{q}
+                [Question]
+                {q}
 
-[Wrong Solution]
-{w_trace}
+                [Wrong Solution]
+                {w_trace}
 
-[Correct Solution]
-{c_trace}
+                [Correct Solution]
+                {c_trace}
 
-[TASK]
-1. Identify the specific logic error in the Wrong Solution compared to the Correct Solution.
-2. Formulate a general rule (Trigger + Strategy) to avoid this error.
-3. **CRITICAL**: Use variables (X, Y, Z) instead of specific numbers from the question.
+                STRICT OUTPUT FORMAT INSTRUCTION:
+                1. **Trigger (A)**: A short, abstract description of the problem pattern (max 1 sentence).
+                2. **Strategy (B)**: A concise, step-by-step algorithm or formula using variables (X, Y, Z).
+                3. **FORBIDDEN**: Do NOT include words like "Explanation", "To avoid error", "The wrong solution did...".
+                4. **FORBIDDEN**: Do NOT use specific numbers from the question.
 
-STRICT OUTPUT FORMAT:
-**Trigger (A)**: [Describe the problem type or condition]
-**Strategy (B)**: [Describe the correct method abstractly]
-"""
+                [EXAMPLE OUTPUT]
+                **Trigger (A)**: Calculating total cost given quantity and unit rate.
+                **Strategy (B)**: Total_Cost = Quantity * Unit_Rate. Ensure units match before multiplying.
+
+                [YOUR TURN]
+                """
                 contrast_prompts.append(f"<|im_start|>user\n{contrast_content}<|im_end|>\n<|im_start|>assistant\n")
                 contrast_metadata_map.append(i)
-        
+
         if not contrast_prompts:
             return
 
         reflections = self.batch_generate_vllm(contrast_prompts, self.params_reflection)
 
         # ==========================================================
-        # 步骤 3: 解析规则 & 准备批量验证 (关键优化点)
+        # Step 3: 解析规则 & 构造验证 prompt（🔧 FIX：完整 metadata）
         # ==========================================================
-        
         verify_prompts = []
         verify_candidates_metadata = []
 
         for idx, reflection_text in enumerate(reflections):
             original_idx = contrast_metadata_map[idx]
+
             q = target_questions[original_idx]
             gt = target_answers[original_idx]
-            
+
             parsed = self.parse_reflection(reflection_text)
-            if not parsed: continue
+            if not parsed:
+                continue
+
             trigger, strategy = parsed
-            
-            if self.has_specific_numbers(strategy, q): continue
-            if len(strategy) < 10: continue
+            if self.has_specific_numbers(strategy, q):
+                continue
+            if len(strategy) < 10:
+                continue
+
+            temp_embed = self.embedder.encode(trigger + " " + strategy, convert_to_numpy=True)
+            try:
+                existing = self.memory.collection.query(query_embeddings=[temp_embed], n_results=1)
+                if existing['ids'] and existing['ids'][0]:
+                    # 如果相似度非常高 (distance < 0.2)，说明库里已经有了，直接跳过，省下验证的时间
+                    if existing['distances'][0][0] < 0.2:
+                        print(f"   Duplicate rule detected (dist={existing['distances'][0][0]:.3f}), skipping verification.")
+                        continue
+            except Exception as e:
+                pass
 
             v_prompt = self.construct_prompt(q, context=strategy)
             verify_prompts.append(v_prompt)
-            
-            # 记录元数据，等会儿验证完了一一对应
+
+            # 🔧 FIX：保存 question / index / gt，避免错位
             verify_candidates_metadata.append({
                 "trigger": trigger,
                 "strategy": strategy,
-                "gt": gt
+                "question": q,
+                "gt": gt,
+                "local_idx": original_idx
             })
 
         # ==========================================================
-        # 步骤 4: 批量并行验证 (Batch Verification)
+        # Step 4: Batch 验证
         # ==========================================================
         if not verify_prompts:
             return
 
-        # 🚀 只有一次 vLLM 调用，效率最高
         verify_outputs = self.batch_generate_vllm(verify_prompts, self.params_verify)
 
         new_patterns = []
         new_strategies = []
         new_embeddings_inputs = []
 
-        # 检查验证结果
         for i, pred in enumerate(verify_outputs):
             meta = verify_candidates_metadata[i]
             gt = meta["gt"]
-            
+            q = meta["question"]
+
             if self.check_answer(pred, gt):
-                # 验证通过！
                 self.log_debug({
                     "epoch": epoch,
                     "phase": "rule_verified",
                     "trigger": meta["trigger"],
                     "strategy": meta["strategy"],
-                    "question": q,
+                    "question": q,   # ✅ 绝对正确
                     "gt": gt
                 })
-                print(f"    ✅ Rule Verified: {meta['trigger'][:40]}... -> {meta['strategy'][:40]}...")
+
+                tqdm.write(f"    ✅ Rule Verified: {meta['trigger'][:40]}... -> {meta['strategy'][:40]}...")
                 new_patterns.append(meta["trigger"])
                 new_strategies.append(meta["strategy"])
                 new_embeddings_inputs.append(meta["trigger"])
@@ -293,9 +304,10 @@ STRICT OUTPUT FORMAT:
             embeddings = self.embedder.encode(new_embeddings_inputs, convert_to_numpy=True)
             self.memory.add_experience_batch(new_patterns, new_strategies, embeddings)
 
+
     def run_full_evolution(self):
         # 1. 准备数据
-        dataset = load_dataset("gsm8k", "main")['train'].select(range(200)) 
+        dataset = load_dataset("gsm8k", "main")['train'].select(range(50)) 
         
         total_len = len(dataset)
         print(f"⚡️ 正在预计算 {total_len} 条问题的 Embedding (CPU Mode)...")
@@ -347,13 +359,6 @@ STRICT OUTPUT FORMAT:
 
                     if not is_right:
                         incorrect_local_indices.append(idx)
-                        self.log_debug({
-                            "epoch": epoch,
-                            "phase": "zero_shot",
-                            "question": chunk_questions[idx],
-                            "pred": pred,
-                            "gt": gt
-                        })
                     epoch_total_count += 1
 
                 chunk_final_correct = zs_is_correct[:]
@@ -374,7 +379,7 @@ STRICT OUTPUT FORMAT:
                     wrong_answers = [chunk_answers[i] for i in incorrect_local_indices]
                     
                     # 2. 检索规则
-                    retrieved_batch = self.memory.batch_retrieve(wrong_embeddings, top_k=3, threshold=0.4)
+                    retrieved_batch = self.memory.batch_retrieve(wrong_embeddings, top_k=3, threshold=0.6)
                     
                     rag_prompts = []
                     
