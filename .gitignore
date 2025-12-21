@@ -210,3 +210,7 @@ __marimo__/
 reflexion_model/reflexion_full_db/
 reflexion_model/hf_cache/
 reflexion_model/debug_trace.jsonl/
+
+reflexion_model_new/reflexion_full_db/
+reflexion_model_new/hf_cache/
+reflexion_model_new/debug_trace.jsonl/

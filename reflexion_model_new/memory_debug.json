@@ -1,0 +1,4404 @@
+{
+  "system_summary": {
+    "timestamp": "2025-12-21 12:20:07",
+    "total_steps": 203,
+    "total_rules": 191,
+    "memory_capacity": 2000,
+    "capacity_usage": "9.6%"
+  },
+  "rules": [
+    {
+      "rank_metrics": {
+        "expected_value": 0.898,
+        "uncertainty_variance": 0.0018,
+        "status": "PROVEN / HIGH QUALITY"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that individual prices and quantities of items are specified.",
+        "strategy_solution": "Sum individual costs using quantities and prices.",
+        "rule_id": "rule_1766287161_0_769"
+      },
+      "raw_stats": {
+        "alpha_success": 44.0,
+        "beta_failure": 5.0,
+        "usage_count": 47,
+        "raw_win_rate": "91.5%"
+      },
+      "lifecycle": {
+        "created_at_step": 22,
+        "current_age": 181
+      },
+      "rank_index": 1
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.8571,
+        "uncertainty_variance": 0.0153,
+        "status": "PROVEN / HIGH QUALITY"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the final amount given that an initial sum is reduced by a certain amount and then increased by a percentage.",
+        "strategy_solution": "Subtract initial loss, then add returned value including interest.",
+        "rule_id": "rule_1766287053_0_934"
+      },
+      "raw_stats": {
+        "alpha_success": 6.0,
+        "beta_failure": 1.0,
+        "usage_count": 5,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 17,
+        "current_age": 186
+      },
+      "rank_index": 2
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.8333,
+        "uncertainty_variance": 0.0198,
+        "status": "PROVEN / HIGH QUALITY"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time given that specific task times and quantities are provided.",
+        "strategy_solution": "Multiply each object's value by its quantity, then sum all results.",
+        "rule_id": "rule_1766289565_2_549"
+      },
+      "raw_stats": {
+        "alpha_success": 5.0,
+        "beta_failure": 1.0,
+        "usage_count": 4,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 140,
+        "current_age": 63
+      },
+      "rank_index": 3
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.8,
+        "uncertainty_variance": 0.0267,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the difference in averages given that the averages for two semesters are provided.",
+        "strategy_solution": "Calculate total, find average, then subtract values.",
+        "rule_id": "rule_1766286511_0_644"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 1.0,
+        "usage_count": 3,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 0,
+        "current_age": 203
+      },
+      "rank_index": 4
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.8,
+        "uncertainty_variance": 0.0267,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the difference in monetary value given that a percentage of items is bought and sold at different prices.",
+        "strategy_solution": "Identify total cost, calculate sold quantity, determine revenue, then find profit difference.",
+        "rule_id": "rule_1766286899_0_670"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 1.0,
+        "usage_count": 3,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 10,
+        "current_age": 193
+      },
+      "rank_index": 5
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.8,
+        "uncertainty_variance": 0.0267,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that a \"buy one get one free\" promotion is applied to a set of items.",
+        "strategy_solution": "Divide total objects by two, then multiply by unit cost.",
+        "rule_id": "rule_1766287470_0_304"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 1.0,
+        "usage_count": 3,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 34,
+        "current_age": 169
+      },
+      "rank_index": 6
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.8,
+        "uncertainty_variance": 0.0145,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the sale price of an item given that the trade-in value, additional payments, and change received are known.",
+        "strategy_solution": "Calculate total spent, total received, then find difference.",
+        "rule_id": "rule_1766287654_3_895"
+      },
+      "raw_stats": {
+        "alpha_success": 8.0,
+        "beta_failure": 2.0,
+        "usage_count": 8,
+        "raw_win_rate": "87.5%"
+      },
+      "lifecycle": {
+        "created_at_step": 43,
+        "current_age": 160
+      },
+      "rank_index": 7
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.8,
+        "uncertainty_variance": 0.0267,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining capacity given that the total capacity and current occupancy are known for each section.",
+        "strategy_solution": "Divide total capacity by sections, then subtract current occupancy.",
+        "rule_id": "rule_1766288044_0_239"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 1.0,
+        "usage_count": 3,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 63,
+        "current_age": 140
+      },
+      "rank_index": 8
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.76,
+        "uncertainty_variance": 0.0135,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining amount of money given that initial amounts and expenditures are provided.",
+        "strategy_solution": "Sum received values, subtract expenditures, find remainder.",
+        "rule_id": "rule_1766287227_0_352"
+      },
+      "raw_stats": {
+        "alpha_success": 9.5,
+        "beta_failure": 3.0,
+        "usage_count": 10,
+        "raw_win_rate": "85.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 25,
+        "current_age": 178
+      },
+      "rank_index": 9
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of smaller objects that can fit into a larger object given their respective dimensions.",
+        "strategy_solution": "Calculate volumes, then divide smaller volume by larger volume.",
+        "rule_id": "rule_1766287318_0_943"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 1.0,
+        "usage_count": 2,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 27,
+        "current_age": 176
+      },
+      "rank_index": 10
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Dividing a total quantity of multiple types of items among several people given that the total quantity for each type and the number of people are known.",
+        "strategy_solution": "Divide total values by number of entities; sum results for total per entity.",
+        "rule_id": "rule_1766287493_0_701"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 1.0,
+        "usage_count": 2,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 35,
+        "current_age": 168
+      },
+      "rank_index": 11
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the length of a part given that the total length and ratios of other parts are known.",
+        "strategy_solution": "Define variables, set up equations with given ratios, combine like terms, solve for unknowns.",
+        "rule_id": "rule_1766287612_2_929"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 1.0,
+        "usage_count": 2,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 41,
+        "current_age": 162
+      },
+      "rank_index": 12
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of objects sold given that the value of each object changes and the goal is to recoup the original investment.",
+        "strategy_solution": "Calculate total investment, new value per object, then divide investment by new value.",
+        "rule_id": "rule_1766287708_0_40"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 1.0,
+        "usage_count": 2,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 46,
+        "current_age": 157
+      },
+      "rank_index": 13
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0208,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of tanks needed given that the total volume and individual tank capacity are provided.",
+        "strategy_solution": "Divide total value by individual capacity to find number of objects needed.",
+        "rule_id": "rule_1766287723_0_450"
+      },
+      "raw_stats": {
+        "alpha_success": 6.0,
+        "beta_failure": 2.0,
+        "usage_count": 6,
+        "raw_win_rate": "83.3%"
+      },
+      "lifecycle": {
+        "created_at_step": 47,
+        "current_age": 156
+      },
+      "rank_index": 14
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the surviving fraction given that an initial quantity is subject to sequential reductions due to various factors.",
+        "strategy_solution": "Sequentially apply fractions to initial value, accounting for each loss step.",
+        "rule_id": "rule_1766287895_1_549"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 1.0,
+        "usage_count": 2,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 54,
+        "current_age": 149
+      },
+      "rank_index": 15
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of attendees given that each invited friend can bring two additional guests.",
+        "strategy_solution": "Multiply initial objects by factor, then add results.",
+        "rule_id": "rule_1766288122_1_50"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 1.0,
+        "usage_count": 2,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 67,
+        "current_age": 136
+      },
+      "rank_index": 16
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining amount needed to meet a goal given that specific shortfalls on previous days are known.",
+        "strategy_solution": "Calculate total shortfall, add to daily goal.",
+        "rule_id": "rule_1766288569_0_835"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 1.0,
+        "usage_count": 2,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 88,
+        "current_age": 115
+      },
+      "rank_index": 17
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total weight given that specific weights and quantities of items are known.",
+        "strategy_solution": "Sum all object values, ensuring no overlaps.",
+        "rule_id": "rule_1766289049_0_449"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 1.0,
+        "usage_count": 2,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 113,
+        "current_age": 90
+      },
+      "rank_index": 18
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.75,
+        "uncertainty_variance": 0.0208,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining quantity given that a certain number of items are subtracted daily.",
+        "strategy_solution": "Track total subtracted values from initial quantity.",
+        "rule_id": "rule_1766289526_1_875"
+      },
+      "raw_stats": {
+        "alpha_success": 6.0,
+        "beta_failure": 2.0,
+        "usage_count": 6,
+        "raw_win_rate": "83.3%"
+      },
+      "lifecycle": {
+        "created_at_step": 138,
+        "current_age": 65
+      },
+      "rank_index": 19
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.7333,
+        "uncertainty_variance": 0.0122,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that a discount rate and quantity are provided.",
+        "strategy_solution": "Calculate total value, apply percentage discount, subtract from total.",
+        "rule_id": "rule_1766289452_0_406"
+      },
+      "raw_stats": {
+        "alpha_success": 11.0,
+        "beta_failure": 4.0,
+        "usage_count": 13,
+        "raw_win_rate": "76.9%"
+      },
+      "lifecycle": {
+        "created_at_step": 134,
+        "current_age": 69
+      },
+      "rank_index": 20
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.7143,
+        "uncertainty_variance": 0.0255,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining quantity given that a tenth of the initial amount is subtracted daily over four days, then the rest is removed on the fifth day.",
+        "strategy_solution": "Calculate daily reductions, sum, subtract from total.",
+        "rule_id": "rule_1766287358_0_533"
+      },
+      "raw_stats": {
+        "alpha_success": 5.0,
+        "beta_failure": 2.0,
+        "usage_count": 5,
+        "raw_win_rate": "80.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 29,
+        "current_age": 174
+      },
+      "rank_index": 21
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.7143,
+        "uncertainty_variance": 0.0255,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time spent away from home given that the distance for the return trip is 20% longer and the speed of travel is known.",
+        "strategy_solution": "Identify total distance, calculate individual segments, sum times, include pauses.",
+        "rule_id": "rule_1766288066_0_107"
+      },
+      "raw_stats": {
+        "alpha_success": 5.0,
+        "beta_failure": 2.0,
+        "usage_count": 5,
+        "raw_win_rate": "80.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 64,
+        "current_age": 139
+      },
+      "rank_index": 22
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.7037,
+        "uncertainty_variance": 0.0074,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the final cost given that the discount applies to the cheaper item and an additional discount is applied to the total amount.",
+        "strategy_solution": "Identify cheaper object, apply first discount, sum remaining values, apply second discount.",
+        "rule_id": "rule_1766287296_0_538"
+      },
+      "raw_stats": {
+        "alpha_success": 19.0,
+        "beta_failure": 8.0,
+        "usage_count": 25,
+        "raw_win_rate": "72.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 27,
+        "current_age": 176
+      },
+      "rank_index": 23
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the average rate of branches per foot given that the height and number of branches for four trees are provided.",
+        "strategy_solution": "Divide objects' values by their heights, sum, then average.",
+        "rule_id": "rule_1766286542_0_311"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 0,
+        "current_age": 203
+      },
+      "rank_index": 24
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0317,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of equal sections given that a total length and section size are provided.",
+        "strategy_solution": "Divide total value by unit size to find number of units.",
+        "rule_id": "rule_1766286597_0_342"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 2.0,
+        "usage_count": 4,
+        "raw_win_rate": "75.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 2,
+        "current_age": 201
+      },
+      "rank_index": 25
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of years given that the total cost per stadium is $900 and savings per year are $1,500.",
+        "strategy_solution": "Calculate total value, then divide by annual savings to find years needed.",
+        "rule_id": "rule_1766286610_0_776"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 2,
+        "current_age": 201
+      },
+      "rank_index": 26
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that different rates apply to adults, children, and senior citizens.",
+        "strategy_solution": "Categorize objects, calculate values per category, sum totals.",
+        "rule_id": "rule_1766286665_0_92"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 3,
+        "current_age": 200
+      },
+      "rank_index": 27
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time given that there are a certain number of books, each containing a fixed number of puzzles, and each puzzle takes a fixed amount of time.",
+        "strategy_solution": "Multiply total objects by value per object.",
+        "rule_id": "rule_1766286790_1_96"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 7,
+        "current_age": 196
+      },
+      "rank_index": 28
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of fried chickens given that Steph bought a specific number of drumsticks and a reduced number of breast parts.",
+        "strategy_solution": "Identify total objects, subtract values, sum remaining.",
+        "rule_id": "rule_1766286849_1_666"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 9,
+        "current_age": 194
+      },
+      "rank_index": 29
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Balancing weights given that two different weights and a rock's weight are provided.",
+        "strategy_solution": "Identify weight difference, then divide by object weight to find needed objects.",
+        "rule_id": "rule_1766286999_0_905"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 14,
+        "current_age": 189
+      },
+      "rank_index": 30
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the time given that a starting length, a current length, and a growth rate per time period are known.",
+        "strategy_solution": "Calculate difference, divide by rate, convert to desired unit.",
+        "rule_id": "rule_1766287037_0_672"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 16,
+        "current_age": 187
+      },
+      "rank_index": 31
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0317,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the initial quantity given that a subset of the items is distributed and then further redistributed with known final amounts.",
+        "strategy_solution": "Work backwards from final amounts, account for redistributions, sum original values.",
+        "rule_id": "rule_1766287126_2_798"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 2.0,
+        "usage_count": 4,
+        "raw_win_rate": "75.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 20,
+        "current_age": 183
+      },
+      "rank_index": 32
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time required given that a fixed number of checks and time per check are specified.",
+        "strategy_solution": "Sum values, multiply by rate, convert units.",
+        "rule_id": "rule_1766287181_1_295"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 23,
+        "current_age": 180
+      },
+      "rank_index": 33
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the amount to cover a portion of a shared tip given that the total tip percentage and individual orders are known.",
+        "strategy_solution": "Calculate total cost, then determine tip percentage and allocated share.",
+        "rule_id": "rule_1766287227_1_137"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 25,
+        "current_age": 178
+      },
+      "rank_index": 34
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0139,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining quantity given that fractions of a total quantity are used for different purposes.",
+        "strategy_solution": "Subtract used fractions from total, calculate remaining.",
+        "rule_id": "rule_1766287376_0_350"
+      },
+      "raw_stats": {
+        "alpha_success": 10.0,
+        "beta_failure": 5.0,
+        "usage_count": 13,
+        "raw_win_rate": "69.2%"
+      },
+      "lifecycle": {
+        "created_at_step": 30,
+        "current_age": 173
+      },
+      "rank_index": 35
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total sum of strawberries given that the amount picked by each family member is related to the others.",
+        "strategy_solution": "Identify relationships, calculate totals, then divide by number of entities.",
+        "rule_id": "rule_1766287414_0_818"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 32,
+        "current_age": 171
+      },
+      "rank_index": 36
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Determining the point at which the cost of maintaining chickens becomes cheaper than the cost of purchasing eggs given that the initial cost and weekly expenses for chickens and eggs are provided.",
+        "strategy_solution": "Set up inequality comparing total costs, solve for threshold value.",
+        "rule_id": "rule_1766287435_1_479"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 33,
+        "current_age": 170
+      },
+      "rank_index": 37
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the new area of a rectangle given that its dimensions are increased by a constant amount",
+        "strategy_solution": "Determine original dimensions, calculate new dimensions by adding constants, compute new area using length × width.",
+        "rule_id": "rule_1766287493_1_693"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 35,
+        "current_age": 168
+      },
+      "rank_index": 38
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of contributors given that the average contribution and the target funding amount are known.",
+        "strategy_solution": "Subtract initial amount from target, then divide by average contribution.",
+        "rule_id": "rule_1766287533_0_571"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 37,
+        "current_age": 166
+      },
+      "rank_index": 39
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the new balance after a payment and potential interest given that an initial balance, payment amount, and interest rate are provided.",
+        "strategy_solution": "Subtract payment from initial balance, then add interest if balance remains.",
+        "rule_id": "rule_1766287612_0_45"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 41,
+        "current_age": 162
+      },
+      "rank_index": 40
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of donuts given that each friend is to receive the same number of donuts and an extra one is bought for precaution.",
+        "strategy_solution": "Sum initial requests, add extras, then include self.",
+        "rule_id": "rule_1766287612_1_844"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 41,
+        "current_age": 162
+      },
+      "rank_index": 41
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining number of gnomes given that the initial quantity and percentage taken are specified.",
+        "strategy_solution": "Identify total, calculate percentage, subtract remainder.",
+        "rule_id": "rule_1766287627_0_788"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 42,
+        "current_age": 161
+      },
+      "rank_index": 42
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time required given that Rachel sets up her equipment once, records multiple videos, and edits each video.",
+        "strategy_solution": "Sum individual times (setup, painting, editing) then divide by number of objects (videos).",
+        "rule_id": "rule_1766287653_0_666"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 43,
+        "current_age": 160
+      },
+      "rank_index": 43
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0317,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total volume of a mixture given that specific volumes of individual components are provided.",
+        "strategy_solution": "Sum individual volumes, then divide by serving size.",
+        "rule_id": "rule_1766287766_0_732"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 2.0,
+        "usage_count": 4,
+        "raw_win_rate": "75.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 49,
+        "current_age": 154
+      },
+      "rank_index": 44
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time given that each model's runway trip duration and the number of outfits they will wear are specified.",
+        "strategy_solution": "Multiply total objects by their value, then sum results.",
+        "rule_id": "rule_1766287824_0_824"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 51,
+        "current_age": 152
+      },
+      "rank_index": 45
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the fine given that 1% of annual profits is to be determined from daily earnings and monthly expenses.",
+        "strategy_solution": "Calculate daily values, then annualize earnings and expenses, finally apply percentage to find fine.",
+        "rule_id": "rule_1766287843_0_596"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 52,
+        "current_age": 151
+      },
+      "rank_index": 46
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of days given that a quantity doubles every day and determining when it was below a certain threshold.",
+        "strategy_solution": "Divide the current value by two, tracking the steps until below the threshold.",
+        "rule_id": "rule_1766287862_0_741"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 53,
+        "current_age": 150
+      },
+      "rank_index": 47
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Determining the next roll needed to achieve a specific average given that the sum and count of previous rolls are known.",
+        "strategy_solution": "Calculate total needed for target average, subtract current sum, solve for remaining value.",
+        "rule_id": "rule_1766287960_2_782"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 58,
+        "current_age": 145
+      },
+      "rank_index": 48
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that the cost of a chair is a fraction of the cost of a table.",
+        "strategy_solution": "Identify fraction, calculate individual cost, then sum values.",
+        "rule_id": "rule_1766288084_0_416"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 65,
+        "current_age": 138
+      },
+      "rank_index": 49
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the time required to reach a target temperature given that the initial temperature and rate of heating are known.",
+        "strategy_solution": "Calculate time by dividing total temperature change by rate.",
+        "rule_id": "rule_1766288338_0_696"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 79,
+        "current_age": 124
+      },
+      "rank_index": 50
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0317,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating total driving time given that the total number of objects, transport capacity, and travel speed are known.",
+        "strategy_solution": "Divide objects by capacity, then multiply by round-trip time.",
+        "rule_id": "rule_1766288919_1_965"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 2.0,
+        "usage_count": 4,
+        "raw_win_rate": "75.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 107,
+        "current_age": 96
+      },
+      "rank_index": 51
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the additional amount one party needs to pay to ensure equal sharing of expenses given that the total medical expenses and house help's salary are known.",
+        "strategy_solution": "Identify total costs, split expenses, calculate shortfall for equal sharing.",
+        "rule_id": "rule_1766289137_0_293"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 118,
+        "current_age": 85
+      },
+      "rank_index": 52
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time given that additional minutes are added to specific days of the week.",
+        "strategy_solution": "Sum daily values, account for anomalies, convert total.",
+        "rule_id": "rule_1766289565_0_242"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 140,
+        "current_age": 63
+      },
+      "rank_index": 53
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the duration to exhaust a resource given that the total quantity and usage frequency per group are known.",
+        "strategy_solution": "Identify total objects, divide by group size, calculate usage period.",
+        "rule_id": "rule_1766289565_1_291"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 140,
+        "current_age": 63
+      },
+      "rank_index": 54
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6667,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the initial quantity given that subsequent additions and subtractions are known.",
+        "strategy_solution": "Set up an equation representing the final value after all additions and subtractions.",
+        "rule_id": "rule_1766289881_0_22"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 1.0,
+        "usage_count": 1,
+        "raw_win_rate": "100.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 156,
+        "current_age": 47
+      },
+      "rank_index": 55
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6364,
+        "uncertainty_variance": 0.0193,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of events given that a duration and frequency are provided.",
+        "strategy_solution": "Divide total duration by event interval.",
+        "rule_id": "rule_1766286754_1_913"
+      },
+      "raw_stats": {
+        "alpha_success": 7.0,
+        "beta_failure": 4.0,
+        "usage_count": 9,
+        "raw_win_rate": "66.7%"
+      },
+      "lifecycle": {
+        "created_at_step": 6,
+        "current_age": 197
+      },
+      "rank_index": 56
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6364,
+        "uncertainty_variance": 0.0101,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost of items given that each item's regular price and discount rate are provided.",
+        "strategy_solution": "Calculate total value, apply percentage discount, subtract from total.",
+        "rule_id": "rule_1766288101_0_769"
+      },
+      "raw_stats": {
+        "alpha_success": 14.0,
+        "beta_failure": 8.0,
+        "usage_count": 20,
+        "raw_win_rate": "65.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 66,
+        "current_age": 137
+      },
+      "rank_index": 57
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6154,
+        "uncertainty_variance": 0.0059,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the cost per item given that the total revenue and additional price per sale are known.",
+        "strategy_solution": "Identify total objects, revenue, additional value, then calculate base value per object.",
+        "rule_id": "rule_1766287493_2_145"
+      },
+      "raw_stats": {
+        "alpha_success": 24.0,
+        "beta_failure": 15.0,
+        "usage_count": 37,
+        "raw_win_rate": "62.2%"
+      },
+      "lifecycle": {
+        "created_at_step": 35,
+        "current_age": 168
+      },
+      "rank_index": 58
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.6,
+        "uncertainty_variance": 0.04,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of attendees given that there are specified numbers of groups of relatives.",
+        "strategy_solution": "Identify groups, count members, sum totals, include additional elements.",
+        "rule_id": "rule_1766288084_1_197"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 2.0,
+        "usage_count": 3,
+        "raw_win_rate": "66.7%"
+      },
+      "lifecycle": {
+        "created_at_step": 65,
+        "current_age": 138
+      },
+      "rank_index": 59
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5714,
+        "uncertainty_variance": 0.0306,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of nights required given that the total cost and earnings per night are known.",
+        "strategy_solution": "Divide total value by unit value to find quantity.",
+        "rule_id": "rule_1766286511_1_929"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 3.0,
+        "usage_count": 5,
+        "raw_win_rate": "60.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 0,
+        "current_age": 203
+      },
+      "rank_index": 60
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5714,
+        "uncertainty_variance": 0.0306,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the required number of pages to meet an average given that daily readings and a desired average are provided.",
+        "strategy_solution": "Calculate total goal, sum read values, find difference.",
+        "rule_id": "rule_1766287930_1_704"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 3.0,
+        "usage_count": 5,
+        "raw_win_rate": "60.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 56,
+        "current_age": 147
+      },
+      "rank_index": 61
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5714,
+        "uncertainty_variance": 0.0306,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the hourly rate given that the monthly salary and work schedule are known.",
+        "strategy_solution": "Divide total weekly value by days, then divide by hours.",
+        "rule_id": "rule_1766287960_0_505"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 3.0,
+        "usage_count": 5,
+        "raw_win_rate": "60.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 58,
+        "current_age": 145
+      },
+      "rank_index": 62
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5714,
+        "uncertainty_variance": 0.0306,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time required to complete a task given that the rate of completing similar tasks and the total quantity are known.",
+        "strategy_solution": "Divide total value by rate, then multiply by quantity.",
+        "rule_id": "rule_1766289350_2_802"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 3.0,
+        "usage_count": 5,
+        "raw_win_rate": "60.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 129,
+        "current_age": 74
+      },
+      "rank_index": 63
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5556,
+        "uncertainty_variance": 0.0247,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of occurrences given that a rate and duration are provided.",
+        "strategy_solution": "Convert duration to base unit, then multiply by rate.",
+        "rule_id": "rule_1766288450_1_454"
+      },
+      "raw_stats": {
+        "alpha_success": 5.0,
+        "beta_failure": 4.0,
+        "usage_count": 7,
+        "raw_win_rate": "57.1%"
+      },
+      "lifecycle": {
+        "created_at_step": 82,
+        "current_age": 121
+      },
+      "rank_index": 64
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the current inventory given that initial stock, in-store sales, online sales, and received shipments are provided.",
+        "strategy_solution": "Track initial values, subtract sales, add received items, calculate final stock.",
+        "rule_id": "rule_1766286564_0_815"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 1,
+        "current_age": 202
+      },
+      "rank_index": 65
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the maximum number of bracelets given that each bracelet requires a specific ratio of large to small beads and a limited total number of beads.",
+        "strategy_solution": "Identify total resources, required ratios, and calculate feasible units step-by-step.",
+        "rule_id": "rule_1766286682_0_569"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 4,
+        "current_age": 199
+      },
+      "rank_index": 66
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.05,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the difference in quantities given that one quantity doubles every week and the final quantity for the other is known.",
+        "strategy_solution": "Identify growth pattern, calculate final values, find difference.",
+        "rule_id": "rule_1766286754_0_133"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 2.0,
+        "usage_count": 2,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 6,
+        "current_age": 197
+      },
+      "rank_index": 67
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of unused crayons given that the usage status of crayons in different sets of boxes is specified.",
+        "strategy_solution": "Identify fractions, calculate unused objects, sum results.",
+        "rule_id": "rule_1766286754_2_826"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 6,
+        "current_age": 197
+      },
+      "rank_index": 68
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating earnings from pool cleaning given that total earnings and earnings from babysitting are known.",
+        "strategy_solution": "Identify total, subtract known parts, calculate remainder.",
+        "rule_id": "rule_1766286790_0_482"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 7,
+        "current_age": 196
+      },
+      "rank_index": 69
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of feedings given that each feeding removes a certain number of drops and a certain volume of blood is lethal.",
+        "strategy_solution": "Identify unit values, set up ratio, calculate total needed.",
+        "rule_id": "rule_1766286826_0_4"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 8,
+        "current_age": 195
+      },
+      "rank_index": 70
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total sum of objects given that each basket contains a specified number of different fruits and the fourth basket has 2 less of each fruit.",
+        "strategy_solution": "Sum values of each type of object across standard baskets, adjust for reduced values in the last basket.",
+        "rule_id": "rule_1766286849_0_972"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 9,
+        "current_age": 194
+      },
+      "rank_index": 71
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the time until sunset given that the sunset time increases by a constant amount each day.",
+        "strategy_solution": "Identify constant rate change, calculate total change, add to initial value, find difference from current time.",
+        "rule_id": "rule_1766286865_1_756"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 10,
+        "current_age": 193
+      },
+      "rank_index": 72
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total weight of strawberries given that the payment includes the deduction of the entrance fee and the price per pound.",
+        "strategy_solution": "Identify total cost, add entrance fees, divide by price per unit.",
+        "rule_id": "rule_1766286881_0_783"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 10,
+        "current_age": 193
+      },
+      "rank_index": 73
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the average given that five temperature readings are provided.",
+        "strategy_solution": "Sum objects, divide by count, average found.",
+        "rule_id": "rule_1766286881_1_749"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 10,
+        "current_age": 193
+      },
+      "rank_index": 74
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the proportional share given that the total cost and usage days are divided between two parties.",
+        "strategy_solution": "Divide total value by total parts, then multiply by individual share.",
+        "rule_id": "rule_1766286899_1_975"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 10,
+        "current_age": 193
+      },
+      "rank_index": 75
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.05,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the loss from a transaction given that the total amount and ratio of funds are known.",
+        "strategy_solution": "Determine total parts, calculate individual shares, sum relevant shares, apply discount, find difference.",
+        "rule_id": "rule_1766286948_0_492"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 2.0,
+        "usage_count": 2,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 12,
+        "current_age": 191
+      },
+      "rank_index": 76
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that each donut requires a fixed amount of coffee and a pot of coffee has a specific cost and quantity.",
+        "strategy_solution": "Calculate total need, then divide by supply to find quantity, finally multiply by cost.",
+        "rule_id": "rule_1766286970_0_823"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 13,
+        "current_age": 190
+      },
+      "rank_index": 77
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of wheel rotations given that a certain number of blocks require a specific rotation count and a goal number of blocks is specified.",
+        "strategy_solution": "Identify total required rotations, subtract completed rotations.",
+        "rule_id": "rule_1766286986_0_520"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 14,
+        "current_age": 189
+      },
+      "rank_index": 78
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0357,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the average given that different daily working hours are worked over varying month lengths.",
+        "strategy_solution": "Sum total values, count objects, divide sums by counts.",
+        "rule_id": "rule_1766287104_0_106"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 3.0,
+        "usage_count": 4,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 19,
+        "current_age": 184
+      },
+      "rank_index": 79
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the duration of the bus ride given that the total trip time, walking time, waiting time, and train ride time are known.",
+        "strategy_solution": "Decompose total time into known segments, then solve for the unknown bus ride.",
+        "rule_id": "rule_1766287126_0_121"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 20,
+        "current_age": 183
+      },
+      "rank_index": 80
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the side length of a square given that its perimeter is equal to the area of a circle, where the area of the circle is provided.",
+        "strategy_solution": "Identify formulas, equate given values, solve algebraically.",
+        "rule_id": "rule_1766287126_1_707"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 20,
+        "current_age": 183
+      },
+      "rank_index": 81
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of seashells given that the number increases by a constant amount each week.",
+        "strategy_solution": "Identify initial value, constant increment, and total weeks; apply formula: \\( S_n = S_0 + in \\).",
+        "rule_id": "rule_1766287181_0_321"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 23,
+        "current_age": 180
+      },
+      "rank_index": 82
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that the number of S'mores each person will eat and the total number of people are known, along with the cost to make a certain number of S'mores.",
+        "strategy_solution": "Identify total objects, divide cost by reference quantity, then multiply by total objects.",
+        "rule_id": "rule_1766287318_1_761"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 27,
+        "current_age": 176
+      },
+      "rank_index": 83
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.05,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of boxes needed given that each box can contain one-fifth of the total items.",
+        "strategy_solution": "Divide total values by individual capacity.",
+        "rule_id": "rule_1766287435_0_103"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 2.0,
+        "usage_count": 2,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 33,
+        "current_age": 170
+      },
+      "rank_index": 84
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of female brunettes under 5 feet tall given that 60% of students are female, 50% of females are brunettes, and 50% of female brunettes are under 5 feet tall.",
+        "strategy_solution": "Identify percentages, apply them sequentially to find the desired subset.",
+        "rule_id": "rule_1766287453_0_575"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 34,
+        "current_age": 169
+      },
+      "rank_index": 85
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total amount of coffee needed given that Taylor makes equal volumes of weak and strong coffee using different amounts of coffee per cup.",
+        "strategy_solution": "Calculate separate totals for each type, then sum.",
+        "rule_id": "rule_1766287553_0_363"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 38,
+        "current_age": 165
+      },
+      "rank_index": 86
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total amount given that multiple instances of the same action are performed over a specified period with variations.",
+        "strategy_solution": "Break problem into smaller parts, calculate totals, adjust for variations.",
+        "rule_id": "rule_1766287571_0_255"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 39,
+        "current_age": 164
+      },
+      "rank_index": 87
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0357,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining time given that specific time allocations are known.",
+        "strategy_solution": "Convert total time and activities to same unit, sum activities, subtract from total, convert remainder.",
+        "rule_id": "rule_1766287723_1_467"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 3.0,
+        "usage_count": 4,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 47,
+        "current_age": 156
+      },
+      "rank_index": 88
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time taken by three individuals to complete a marathon given that Micah runs 2/3 times as fast as Dean and it takes Jake 1/3 times more time than Micah, with Dean taking 9 hours.",
+        "strategy_solution": "Identify speeds, calculate times, sum results.",
+        "rule_id": "rule_1766287895_0_146"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 54,
+        "current_age": 149
+      },
+      "rank_index": 89
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.05,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the change given that the total cost and payment amount are provided.",
+        "strategy_solution": "Sum values, subtract from payment to find change.",
+        "rule_id": "rule_1766287930_0_179"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 2.0,
+        "usage_count": 2,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 56,
+        "current_age": 147
+      },
+      "rank_index": 90
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the savings between two options given that the cost per tile and the area to be tiled are specified.",
+        "strategy_solution": "Calculate total area, then total tiles, and finally cost difference for each option.",
+        "rule_id": "rule_1766287960_1_904"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 58,
+        "current_age": 145
+      },
+      "rank_index": 91
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0357,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating total height given that an initial height and growth increment are provided.",
+        "strategy_solution": "Convert all heights to a common unit, then add any increments.",
+        "rule_id": "rule_1766287960_3_453"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 3.0,
+        "usage_count": 4,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 58,
+        "current_age": 145
+      },
+      "rank_index": 92
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.05,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of weeks given that a fixed number of episodes are watched on specific days each week.",
+        "strategy_solution": "Divide total objects by weekly rate to find needed weeks.",
+        "rule_id": "rule_1766287977_0_428"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 2.0,
+        "usage_count": 2,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 59,
+        "current_age": 144
+      },
+      "rank_index": 93
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the maximum allowable weight given that a safety margin must be maintained.",
+        "strategy_solution": "Determine max value, apply safety margin, subtract object value.",
+        "rule_id": "rule_1766288066_1_742"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 64,
+        "current_age": 139
+      },
+      "rank_index": 94
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of weeks required given that Oscar aims to reach a 20-mile run by increasing his distance by 2/3 of a mile each week and has already run 2 miles.",
+        "strategy_solution": "Calculate total remaining, divide by weekly increase, find number of weeks.",
+        "rule_id": "rule_1766288122_0_223"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 67,
+        "current_age": 136
+      },
+      "rank_index": 95
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.05,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the additional daily reading volume given that the total page count and initial daily reading plan are known.",
+        "strategy_solution": "Divide total value by time. Subtract current plan.",
+        "rule_id": "rule_1766288175_0_50"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 2.0,
+        "usage_count": 2,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 70,
+        "current_age": 133
+      },
+      "rank_index": 96
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.05,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Determining the quantity given that one quantity is a multiple of another and their sum is known.",
+        "strategy_solution": "Define variables, express relationships, set up equation, simplify, solve for variable.",
+        "rule_id": "rule_1766288212_0_748"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 2.0,
+        "usage_count": 2,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 72,
+        "current_age": 131
+      },
+      "rank_index": 97
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the difference in total distance given that Kona makes a detour to the bakery before returning home.",
+        "strategy_solution": "Calculate total distances for both scenarios, then find their difference.",
+        "rule_id": "rule_1766288233_0_43"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 73,
+        "current_age": 130
+      },
+      "rank_index": 98
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0357,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the final quantity given a consistent rate of increase over a period",
+        "strategy_solution": "Identify initial value, rate of change, time period; calculate total change; add to initial value.",
+        "rule_id": "rule_1766288248_0_264"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 3.0,
+        "usage_count": 4,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 74,
+        "current_age": 129
+      },
+      "rank_index": 99
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Counting operations given that Carla counts the ceiling tiles twice and the books three times on Tuesday.",
+        "strategy_solution": "Multiply each object's count by its repetitions, then sum results.",
+        "rule_id": "rule_1766288432_1_929"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 81,
+        "current_age": 122
+      },
+      "rank_index": 100
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the equivalent number of goats given that coconuts can be traded for crabs and crabs for goats.",
+        "strategy_solution": "Convert objects step-by-step using given exchange rates.",
+        "rule_id": "rule_1766288450_0_765"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 82,
+        "current_age": 121
+      },
+      "rank_index": 101
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total duration given that the injury healing time is at least 5 times the pain subsidence period, additional waiting days are included, and a final waiting period in weeks is specified.",
+        "strategy_solution": "Identify all time periods, convert weeks to days, sum all durations.",
+        "rule_id": "rule_1766288505_0_590"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 85,
+        "current_age": 118
+      },
+      "rank_index": 102
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of stamps required given that each envelope needs 1 stamp except for those related to the electric bill, which need 2 stamps.",
+        "strategy_solution": "Count objects, apply special rules, sum values.",
+        "rule_id": "rule_1766288505_1_754"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 85,
+        "current_age": 118
+      },
+      "rank_index": 103
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining amount of money given that Todd has to repay a loan, spends money on ingredients, and sells items at a certain price.",
+        "strategy_solution": "Track initial values, subtract expenses, add revenues, then account for debts.",
+        "rule_id": "rule_1766288620_0_611"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 91,
+        "current_age": 112
+      },
+      "rank_index": 104
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.05,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the average loss given that the total expenditure and average value are provided.",
+        "strategy_solution": "Calculate total expenditure, determine average loss per object, then find total average loss.",
+        "rule_id": "rule_1766288685_0_486"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 2.0,
+        "usage_count": 2,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 95,
+        "current_age": 108
+      },
+      "rank_index": 105
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of men with beards given that 60% of champions are women and 40% of male champions had a beard.",
+        "strategy_solution": "Calculate percentages of subsets step-by-step.",
+        "rule_id": "rule_1766288724_0_700"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 97,
+        "current_age": 106
+      },
+      "rank_index": 106
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of players in a specific age range given that fractions of the total number of players are distributed across different age groups.",
+        "strategy_solution": "Identify total, fractions, and unknowns; calculate step-by-step.",
+        "rule_id": "rule_1766288745_0_936"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 98,
+        "current_age": 105
+      },
+      "rank_index": 107
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the amount of white paint given that the proportion of blue paint is 70% and the total amount of blue paint added is 140 ounces.",
+        "strategy_solution": "Determine total objects, then calculate remaining percentage for white objects.",
+        "rule_id": "rule_1766288765_0_901"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 99,
+        "current_age": 104
+      },
+      "rank_index": 108
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of wheels given that each person has a pair of roller skates.",
+        "strategy_solution": "Count objects, multiply by their groups and items.",
+        "rule_id": "rule_1766288861_0_526"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 104,
+        "current_age": 99
+      },
+      "rank_index": 109
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of days given that Socorro trains for 30 minutes each day.",
+        "strategy_solution": "Divide total required time by daily training time.",
+        "rule_id": "rule_1766288882_0_715"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 105,
+        "current_age": 98
+      },
+      "rank_index": 110
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of packs needed given that 3 burgers are planned for each of 10 friends, one friend will not eat burgers, and another will not use buns.",
+        "strategy_solution": "Identify exclusions, calculate totals, adjust for specifics, then divide by pack size.",
+        "rule_id": "rule_1766288919_0_762"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 107,
+        "current_age": 96
+      },
+      "rank_index": 111
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total distance walked given that Rich walks in a series of segments, doubling and halving his distance at each step.",
+        "strategy_solution": "Track cumulative distance, double then halve values at each step.",
+        "rule_id": "rule_1766289006_0_254"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 111,
+        "current_age": 92
+      },
+      "rank_index": 112
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of suitcases given that each family member's contribution is specified.",
+        "strategy_solution": "Sum individual contributions without the nullifier.",
+        "rule_id": "rule_1766289029_0_629"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 112,
+        "current_age": 91
+      },
+      "rank_index": 113
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total study time given that specific time allocations per chapter and worksheet are provided.",
+        "strategy_solution": "Sum object times, add breaks and lunch, divide by daily limit, round up.",
+        "rule_id": "rule_1766289029_1_786"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 112,
+        "current_age": 91
+      },
+      "rank_index": 114
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the maximum allowable rum consumption given that a baseline and a maximum limit are provided.",
+        "strategy_solution": "Identify baseline, calculate total consumed, subtract from maximum allowable.",
+        "rule_id": "rule_1766289084_0_539"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 115,
+        "current_age": 88
+      },
+      "rank_index": 115
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that the time to build one floor by a certain number of builders is known and the daily wage is specified.",
+        "strategy_solution": "Identify rates, scale up, calculate total time, then cost.",
+        "rule_id": "rule_1766289084_2_536"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 115,
+        "current_age": 88
+      },
+      "rank_index": 116
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining percentage given that two sprays with overlapping effectiveness are used.",
+        "strategy_solution": "Identify overlap, subtract from second action, calculate residual.",
+        "rule_id": "rule_1766289181_0_944"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 120,
+        "current_age": 83
+      },
+      "rank_index": 117
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total duration of a trip given that the stay in the first country is specified and the stay in subsequent countries is a multiple of the first.",
+        "strategy_solution": "Identify base duration, multiple, and sum values.",
+        "rule_id": "rule_1766289181_1_604"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 120,
+        "current_age": 83
+      },
+      "rank_index": 118
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the maximum number of iterations given that a fixed time cycle is repeated within a larger time constraint.",
+        "strategy_solution": "Divide total time by cycle duration; round down to nearest whole number.",
+        "rule_id": "rule_1766289350_0_673"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 129,
+        "current_age": 74
+      },
+      "rank_index": 119
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of aquariums cleaned given that the rate of cleaning and total working hours are known.",
+        "strategy_solution": "Divide total hours by cycle length, then multiply by rate.",
+        "rule_id": "rule_1766289368_0_788"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 130,
+        "current_age": 73
+      },
+      "rank_index": 120
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the accumulated amount of garbage given that the garbage truck's collection frequency and average amount per collection are known, and the generation of garbage is altered due to the truck's absence.",
+        "strategy_solution": "Identify collection frequency, calculate weekly amount, account for reduced generation.",
+        "rule_id": "rule_1766289368_1_266"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 130,
+        "current_age": 73
+      },
+      "rank_index": 121
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining debt given that a portion of income is owed annually and payment history is known.",
+        "strategy_solution": "Calculate total value, apply rate, subtract paid, find remainder.",
+        "rule_id": "rule_1766289390_0_592"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 131,
+        "current_age": 72
+      },
+      "rank_index": 122
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total sum of objects given that each person's output is a multiple or half of another's within a specified time frame.",
+        "strategy_solution": "Identify multiples, sums, halves; then scale by time.",
+        "rule_id": "rule_1766289390_1_748"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 131,
+        "current_age": 72
+      },
+      "rank_index": 123
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the time taken by an individual given the ratio of speeds and total time taken by both individuals.",
+        "strategy_solution": "Define variables, set up ratio equation, solve for unknown.",
+        "rule_id": "rule_1766289390_2_37"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 131,
+        "current_age": 72
+      },
+      "rank_index": 124
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the uncovered area given that a rectangular floor and a square carpet with specific dimensions are involved.",
+        "strategy_solution": "Calculate total area, subtract covered area, find remaining area.",
+        "rule_id": "rule_1766289390_3_218"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 131,
+        "current_age": 72
+      },
+      "rank_index": 125
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Determining the visible length of one object given the proportional lengths of related objects, where the length of the red bus is four times the length of the orange car and the orange car's length is 3.5 times shorter than the yellow bus.",
+        "strategy_solution": "Identify proportional relationships, solve for unknown lengths, then calculate visible portion by subtracting.",
+        "rule_id": "rule_1766289506_0_593"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 137,
+        "current_age": 66
+      },
+      "rank_index": 126
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the net change in the number of athletes given that athletes are leaving at a constant rate for a period and entering at a constant rate for a period.",
+        "strategy_solution": "Track net change by subtracting leaving rate times duration and adding entering rate times duration.",
+        "rule_id": "rule_1766289579_0_147"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 140,
+        "current_age": 63
+      },
+      "rank_index": 127
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.05,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total value of coins given that the number of dimes is three times the number of nickels and the number of nickels increases.",
+        "strategy_solution": "Identify initial quantities, calculate changes, compute values, sum totals.",
+        "rule_id": "rule_1766289600_1_917"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 2.0,
+        "usage_count": 2,
+        "raw_win_rate": "50.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 141,
+        "current_age": 62
+      },
+      "rank_index": 128
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of white stones given that the ratio of white to black stones is equal to the ratio of grey to green stones, with the condition that there are more white stones than black ones.",
+        "strategy_solution": "Identify equal ratios, determine higher percentage, calculate total proportion.",
+        "rule_id": "rule_1766289622_0_702"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 142,
+        "current_age": 61
+      },
+      "rank_index": 129
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total space occupied by trees given that the width of each tree and the space required between them are specified.",
+        "strategy_solution": "Sum individual object spaces plus necessary gaps sequentially.",
+        "rule_id": "rule_1766289660_0_888"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 144,
+        "current_age": 59
+      },
+      "rank_index": 130
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of kids given that 10% finish in less than 6 minutes, three times that number finish in less than 8 minutes, and 1/6 of the remaining take more than 14 minutes.",
+        "strategy_solution": "Calculate remaining objects after subtracting initial conditions, then apply fraction rule.",
+        "rule_id": "rule_1766289734_0_152"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 148,
+        "current_age": 55
+      },
+      "rank_index": 131
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of videos watched given that Billy generates multiple lists of suggestions and watches each video on those lists until he finds one he likes.",
+        "strategy_solution": "Calculate total watched by summing elimination rounds and final pick.",
+        "rule_id": "rule_1766289903_0_364"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 157,
+        "current_age": 46
+      },
+      "rank_index": 132
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of unique items given that overlaps exist among different sets.",
+        "strategy_solution": "Sum unique values, adjust for triple overlaps.",
+        "rule_id": "rule_1766289922_0_492"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 158,
+        "current_age": 45
+      },
+      "rank_index": 133
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the birth year of Connie's grandmother given that the gap between her grandmother and her older sister is twice the gap between the older brother and the older sister.",
+        "strategy_solution": "Identify gaps, double the given gap, add to later birth year.",
+        "rule_id": "rule_1766289961_0_699"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 160,
+        "current_age": 43
+      },
+      "rank_index": 134
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of papayas needed given that the consumption rates for different individuals are provided over a period of four weeks.",
+        "strategy_solution": "Sum weekly consumption, then multiply by duration.",
+        "rule_id": "rule_1766290018_0_5"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 163,
+        "current_age": 40
+      },
+      "rank_index": 135
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total sum of items given that the quantities of marbles, frisbees, and deck cards are related through multiplication and addition.",
+        "strategy_solution": "Define variables, express relationships, calculate increases, sum values.",
+        "rule_id": "rule_1766290018_1_832"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 163,
+        "current_age": 40
+      },
+      "rank_index": 136
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the final population given that each mouse initially has a fixed number of pups, some are eaten later due to overcrowding.",
+        "strategy_solution": "Track initial objects, calculate growth, account for losses, sum remaining.",
+        "rule_id": "rule_1766290039_0_149"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 164,
+        "current_age": 39
+      },
+      "rank_index": 137
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total duration of an event given that the trial duration is a multiple of the jury selection duration and the deliberation time is specified in equivalent days.",
+        "strategy_solution": "Identify durations, convert equivalents, sum values.",
+        "rule_id": "rule_1766290094_0_23"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 167,
+        "current_age": 36
+      },
+      "rank_index": 138
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining quantity given that some elements are removed.",
+        "strategy_solution": "Subtract values removed from initial totals.",
+        "rule_id": "rule_1766290113_0_13"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 168,
+        "current_age": 35
+      },
+      "rank_index": 139
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of free throws given that the free-throw success rate, fouls per game, and game participation percentage are known.",
+        "strategy_solution": "Calculate total attempts by multiplying objects, then find successful ones by applying rate.",
+        "rule_id": "rule_1766290184_0_190"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 172,
+        "current_age": 31
+      },
+      "rank_index": 140
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining supplies given that half of the initial set of supplies and additional purchases are lost.",
+        "strategy_solution": "Calculate total needs, subtract losses, add replacements.",
+        "rule_id": "rule_1766290240_0_588"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 175,
+        "current_age": 28
+      },
+      "rank_index": 141
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of cheerleaders needing a specific size given that the total number of cheerleaders and size relationships are known.",
+        "strategy_solution": "Define variables, establish relationships, use total values, substitute, combine, isolate, solve, verify.",
+        "rule_id": "rule_1766290260_0_745"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 176,
+        "current_age": 27
+      },
+      "rank_index": 142
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of chickens sold given that the profit per chicken and the cost of feed per chicken are provided.",
+        "strategy_solution": "Identify costs, profits per unit, and total profit; then calculate units sold.",
+        "rule_id": "rule_1766290260_1_209"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 176,
+        "current_age": 27
+      },
+      "rank_index": 143
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the daily average given that the rainfall amounts for each day are described in terms of previous days' totals.",
+        "strategy_solution": "Sum all daily values, divide by number of days, account for cumulative references.",
+        "rule_id": "rule_1766290299_0_92"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 178,
+        "current_age": 25
+      },
+      "rank_index": 144
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of objects given that each crosswalk has a fixed number of lines and each intersection has a fixed number of crosswalks.",
+        "strategy_solution": "Identify fixed values, multiply intersections by crosswalks then lines.",
+        "rule_id": "rule_1766290318_0_395"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 179,
+        "current_age": 24
+      },
+      "rank_index": 145
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "A: Determining the minimum number of shirts to pack given that the packing period spans seven days with specific usage constraints.",
+        "strategy_solution": "Identify total days, same-shirt days, different-shirt days, then calculate needed objects.",
+        "rule_id": "rule_1766290353_0_628"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 181,
+        "current_age": 22
+      },
+      "rank_index": 146
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the share of straws given that a fraction of the total is distributed equally among a specific number of recipients.",
+        "strategy_solution": "Identify fraction, calculate portion, subtract, divide remainder.",
+        "rule_id": "rule_1766290353_1_442"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 181,
+        "current_age": 22
+      },
+      "rank_index": 147
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of tears given that the ratio of tears to onions and the number of pots of soup are specified.",
+        "strategy_solution": "Identify ratio, calculate total objects, divide by ratio size, multiply by outcome value.",
+        "rule_id": "rule_1766290390_0_100"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 183,
+        "current_age": 20
+      },
+      "rank_index": 148
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining pigeons given that 30% are eaten by peregrine falcons.",
+        "strategy_solution": "Calculate total objects, then apply percentage to find remaining.",
+        "rule_id": "rule_1766290410_0_7"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 184,
+        "current_age": 19
+      },
+      "rank_index": 149
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the final weight of an object given that it undergoes multiple additions and subtractions over time.",
+        "strategy_solution": "Sum initial values, subtract losses, adjust for changes.",
+        "rule_id": "rule_1766290442_0_54"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 185,
+        "current_age": 18
+      },
+      "rank_index": 150
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the difference in constant speeds given that the distances and total travel times for two spacecraft are known.",
+        "strategy_solution": "Identify distances, times, calculate speeds, find difference.",
+        "rule_id": "rule_1766290442_1_307"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 185,
+        "current_age": 18
+      },
+      "rank_index": 151
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of wins given that the total number of games, ties, losses, and associated monetary outcomes are known.",
+        "strategy_solution": "Define variables for wins and losses, set up equations for total games and money, solve.",
+        "rule_id": "rule_1766290547_0_413"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 191,
+        "current_age": 12
+      },
+      "rank_index": 152
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the remaining capacity of total luggage weight given that the maximum weight per bag and the total allowable weight are known.",
+        "strategy_solution": "Calculate total current weight, subtract from max, divide by object weight.",
+        "rule_id": "rule_1766290563_0_815"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 192,
+        "current_age": 11
+      },
+      "rank_index": 153
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the average temperature given that one temperature is 10 degrees hotter than another and 25 degrees cooler than a third.",
+        "strategy_solution": "Identify relationships, calculate individual values, sum, divide by count.",
+        "rule_id": "rule_1766290638_0_947"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 196,
+        "current_age": 7
+      },
+      "rank_index": 154
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that each student purchases one candy bar and two bags of chips.",
+        "strategy_solution": "Identify individual costs, scale to group size, sum totals.",
+        "rule_id": "rule_1766290653_0_434"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 197,
+        "current_age": 6
+      },
+      "rank_index": 155
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of folds given that the total area after folding is 48 square feet and the original area of each blanket is 64 square feet.",
+        "strategy_solution": "Calculate total original area, divide by folded area, find folding factor.",
+        "rule_id": "rule_1766290693_0_587"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 199,
+        "current_age": 4
+      },
+      "rank_index": 156
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the final quantity of objects after trading given that percentages and a trade ratio are specified.",
+        "strategy_solution": "Calculate initial quantities, then apply trade ratios to find final values.",
+        "rule_id": "rule_1766290712_0_327"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 200,
+        "current_age": 3
+      },
+      "rank_index": 157
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating total profit given that the profit from selling shirts and sandals is known and the quantities sold are specified.",
+        "strategy_solution": "Break problem into parts, calculate individual profits, then sum.",
+        "rule_id": "rule_1766290712_1_903"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 200,
+        "current_age": 3
+      },
+      "rank_index": 158
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.5,
+        "uncertainty_variance": 0.0833,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total minutes Gina gets to choose given that her choices are three times those of her sister and her sister watches 24 shows per week.",
+        "strategy_solution": "Define variables, set up ratio and total equations, solve for unknowns, calculate value.",
+        "rule_id": "rule_1766290766_0_533"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 1.0,
+        "usage_count": 0,
+        "raw_win_rate": "N/A"
+      },
+      "lifecycle": {
+        "created_at_step": 203,
+        "current_age": 0
+      },
+      "rank_index": 159
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4737,
+        "uncertainty_variance": 0.0125,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time to complete a task given that the rate of completion and the total amount are known.",
+        "strategy_solution": "Convert total volume, divide by rate, then multiply by time per unit.",
+        "rule_id": "rule_1766286865_0_226"
+      },
+      "raw_stats": {
+        "alpha_success": 9.0,
+        "beta_failure": 10.0,
+        "usage_count": 17,
+        "raw_win_rate": "47.1%"
+      },
+      "lifecycle": {
+        "created_at_step": 10,
+        "current_age": 193
+      },
+      "rank_index": 160
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.46,
+        "uncertainty_variance": 0.0049,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that the quantity and price per unit are provided.",
+        "strategy_solution": "Identify units, calculate totals, apply unit price.",
+        "rule_id": "rule_1766286807_0_733"
+      },
+      "raw_stats": {
+        "alpha_success": 23.0,
+        "beta_failure": 27.0,
+        "usage_count": 48,
+        "raw_win_rate": "45.8%"
+      },
+      "lifecycle": {
+        "created_at_step": 7,
+        "current_age": 196
+      },
+      "rank_index": 161
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4516,
+        "uncertainty_variance": 0.0077,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that the number of days, daily consumption, and cost per unit are known.",
+        "strategy_solution": "Calculate total need, then divide by unit quantity, finally multiply by unit cost.",
+        "rule_id": "rule_1766286807_1_419"
+      },
+      "raw_stats": {
+        "alpha_success": 14.0,
+        "beta_failure": 17.0,
+        "usage_count": 29,
+        "raw_win_rate": "44.8%"
+      },
+      "lifecycle": {
+        "created_at_step": 7,
+        "current_age": 196
+      },
+      "rank_index": 162
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4286,
+        "uncertainty_variance": 0.0306,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time required to sell all items given that a fixed number of items are sold by multiple sales professionals at a constant rate.",
+        "strategy_solution": "Divide total values by rate to find time.",
+        "rule_id": "rule_1766288544_0_547"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 4.0,
+        "usage_count": 5,
+        "raw_win_rate": "40.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 87,
+        "current_age": 116
+      },
+      "rank_index": 163
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4286,
+        "uncertainty_variance": 0.0306,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the time difference given that two objects are moving at constant speeds and the initial distance between them is known.",
+        "strategy_solution": "Convert speeds to same units, find relative speed, then use distance-speed-time formula.",
+        "rule_id": "rule_1766289600_2_187"
+      },
+      "raw_stats": {
+        "alpha_success": 3.0,
+        "beta_failure": 4.0,
+        "usage_count": 5,
+        "raw_win_rate": "40.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 141,
+        "current_age": 62
+      },
+      "rank_index": 164
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4,
+        "uncertainty_variance": 0.0218,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the time difference for two hiking routes given that each route's distance and speed are specified.",
+        "strategy_solution": "Calculate time for each object, sum values including breaks, find difference.",
+        "rule_id": "rule_1766287104_1_44"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 6.0,
+        "usage_count": 8,
+        "raw_win_rate": "37.5%"
+      },
+      "lifecycle": {
+        "created_at_step": 19,
+        "current_age": 184
+      },
+      "rank_index": 165
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4,
+        "uncertainty_variance": 0.04,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the time required to fill a container given varying rates of rainfall over time.",
+        "strategy_solution": "Calculate cumulative values, identify remaining, and determine time for final segment.",
+        "rule_id": "rule_1766287181_2_100"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 3.0,
+        "usage_count": 3,
+        "raw_win_rate": "33.3%"
+      },
+      "lifecycle": {
+        "created_at_step": 23,
+        "current_age": 180
+      },
+      "rank_index": 166
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4,
+        "uncertainty_variance": 0.04,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating age differences given that Joey's future age equals Beth's current age and Joey's current age is provided.",
+        "strategy_solution": "Identify current ages, future age difference, and reverse age difference to find past age.",
+        "rule_id": "rule_1766287201_0_921"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 3.0,
+        "usage_count": 3,
+        "raw_win_rate": "33.3%"
+      },
+      "lifecycle": {
+        "created_at_step": 24,
+        "current_age": 179
+      },
+      "rank_index": 167
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4,
+        "uncertainty_variance": 0.04,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the required average given that a target difference and time frames are specified.",
+        "strategy_solution": "Identify target, current status, gap, time; calculate needed average.",
+        "rule_id": "rule_1766288935_0_56"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 3.0,
+        "usage_count": 3,
+        "raw_win_rate": "33.3%"
+      },
+      "lifecycle": {
+        "created_at_step": 108,
+        "current_age": 95
+      },
+      "rank_index": 168
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4,
+        "uncertainty_variance": 0.04,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total amount given away given that fractions of a quantity are related to each other and a specific value is known.",
+        "strategy_solution": "Identify relationships, solve step-by-step, sum values.",
+        "rule_id": "rule_1766289101_0_299"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 3.0,
+        "usage_count": 3,
+        "raw_win_rate": "33.3%"
+      },
+      "lifecycle": {
+        "created_at_step": 116,
+        "current_age": 87
+      },
+      "rank_index": 169
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.4,
+        "uncertainty_variance": 0.04,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total duration of activities given that specific days' durations are reduced or increased.",
+        "strategy_solution": "Identify changes, calculate each day's value, sum totals.",
+        "rule_id": "rule_1766289240_0_323"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 3.0,
+        "usage_count": 3,
+        "raw_win_rate": "33.3%"
+      },
+      "lifecycle": {
+        "created_at_step": 123,
+        "current_age": 80
+      },
+      "rank_index": 170
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of jobs given that Nikola earns a fixed amount per job and a variable amount per leaf raked.",
+        "strategy_solution": "Calculate total needed, subtract earned, then divide by job value.",
+        "rule_id": "rule_1766286460_0_66"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 0,
+        "current_age": 203
+      },
+      "rank_index": 171
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0317,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating total earnings given that payment is based on transcriptions and includes bonuses for reaching specific milestones.",
+        "strategy_solution": "Identify base payment, calculate bonuses, sum totals.",
+        "rule_id": "rule_1766286542_1_444"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 4.0,
+        "usage_count": 4,
+        "raw_win_rate": "25.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 0,
+        "current_age": 203
+      },
+      "rank_index": 172
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total earnings given that the number of candy bars sold increases by a constant difference each day and the price per candy bar is constant.",
+        "strategy_solution": "Identify arithmetic sequence, sum terms, convert total units to desired measure.",
+        "rule_id": "rule_1766286698_1_520"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 4,
+        "current_age": 199
+      },
+      "rank_index": 173
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the unfenced area given that the total field perimeter and fencing cost per unit are provided.",
+        "strategy_solution": "Divide total funds by cost per unit, subtract from total length, find remainder.",
+        "rule_id": "rule_1766286716_0_404"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 4,
+        "current_age": 199
+      },
+      "rank_index": 174
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0317,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total savings given that a fixed amount is saved initially and a constant increment is added each period.",
+        "strategy_solution": "Initialize with base value, then add incremental value for each period.",
+        "rule_id": "rule_1766288011_0_619"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 4.0,
+        "usage_count": 4,
+        "raw_win_rate": "25.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 61,
+        "current_age": 142
+      },
+      "rank_index": 175
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of objects given that the objects are divided and some are eaten or kept at each step.",
+        "strategy_solution": "Work backwards, double values, account for eaten objects.",
+        "rule_id": "rule_1766288029_0_989"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 62,
+        "current_age": 141
+      },
+      "rank_index": 176
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the original length of objects given that a certain length was reduced by a specified amount multiple times.",
+        "strategy_solution": "Track original values by reversing reductions step-by-step.",
+        "rule_id": "rule_1766288355_1_499"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 79,
+        "current_age": 124
+      },
+      "rank_index": 177
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of customers who did not want their tires changed given that the total number of tires bought and the number of tires remaining are known.",
+        "strategy_solution": "Identify total objects, subtract known values, solve for unknown.",
+        "rule_id": "rule_1766288432_0_778"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 81,
+        "current_age": 122
+      },
+      "rank_index": 178
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total number of intervals given that a linear path is divided into segments, ignoring a partial section.",
+        "strategy_solution": "Divide total by segment, adjust for gaps, double for both sides.",
+        "rule_id": "rule_1766288988_0_857"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 110,
+        "current_age": 93
+      },
+      "rank_index": 179
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the required score given that the desired average and four quiz scores are known.",
+        "strategy_solution": "Calculate total target, sum known values, find difference.",
+        "rule_id": "rule_1766289350_1_588"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 129,
+        "current_age": 74
+      },
+      "rank_index": 180
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total sum of objects given that each part is provided as a fraction or a specific amount of the whole.",
+        "strategy_solution": "Sum individual values then combine.",
+        "rule_id": "rule_1766289600_0_511"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 141,
+        "current_age": 62
+      },
+      "rank_index": 181
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3333,
+        "uncertainty_variance": 0.0556,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the additional score needed given that one player's initial score and the other's additional scores are known.",
+        "strategy_solution": "Determine total goal, subtract current score, calculate difference.",
+        "rule_id": "rule_1766290547_1_274"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 2.0,
+        "usage_count": 1,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 191,
+        "current_age": 12
+      },
+      "rank_index": 182
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.3077,
+        "uncertainty_variance": 0.0152,
+        "status": "AVERAGE"
+      },
+      "content": {
+        "pattern_trigger": "Calculating total earnings given that multiple objects are rented for a specified duration and each has a distinct cost per unit time.",
+        "strategy_solution": "Identify objects, their rates, time duration; calculate individual earnings; sum totals.",
+        "rule_id": "rule_1766287553_1_766"
+      },
+      "raw_stats": {
+        "alpha_success": 4.0,
+        "beta_failure": 9.0,
+        "usage_count": 11,
+        "raw_win_rate": "27.3%"
+      },
+      "lifecycle": {
+        "created_at_step": 38,
+        "current_age": 165
+      },
+      "rank_index": 183
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.2857,
+        "uncertainty_variance": 0.0255,
+        "status": "FAILED / LOW QUALITY"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total sum of sales given that each day's sales are related to the previous day's sales through addition and division.",
+        "strategy_solution": "Identify relationships, calculate sequentially, sum values.",
+        "rule_id": "rule_1766286917_0_619"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 5.0,
+        "usage_count": 5,
+        "raw_win_rate": "20.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 11,
+        "current_age": 192
+      },
+      "rank_index": 184
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.2857,
+        "uncertainty_variance": 0.0255,
+        "status": "FAILED / LOW QUALITY"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total usage time given that each hour of charge lasts a certain number of hours of use and a fraction of the charging time is known.",
+        "strategy_solution": "Identify fraction, calculate charging time, then determine usage based on charge rate.",
+        "rule_id": "rule_1766287723_2_267"
+      },
+      "raw_stats": {
+        "alpha_success": 2.0,
+        "beta_failure": 5.0,
+        "usage_count": 5,
+        "raw_win_rate": "20.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 47,
+        "current_age": 156
+      },
+      "rank_index": 185
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.25,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the elapsed time given that a constant增量 occurs over time until a specific total is reached.",
+        "strategy_solution": "Identify total change, rate, and time intervals; calculate necessary intervals then convert to time.",
+        "rule_id": "rule_1766286526_0_849"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 3.0,
+        "usage_count": 2,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 0,
+        "current_age": 203
+      },
+      "rank_index": 186
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.25,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost given that the price per dog and per cat, and the number of dogs and cats are known.",
+        "strategy_solution": "Multiply values per object by quantity, then sum totals.",
+        "rule_id": "rule_1766287126_3_372"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 3.0,
+        "usage_count": 2,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 20,
+        "current_age": 183
+      },
+      "rank_index": 187
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.25,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the number of months required given that the total goal and current savings are known, along with the monthly savings amount.",
+        "strategy_solution": "Subtract current value from goal, then divide by monthly increment.",
+        "rule_id": "rule_1766287743_0_155"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 3.0,
+        "usage_count": 2,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 48,
+        "current_age": 155
+      },
+      "rank_index": 188
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.25,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total cost over a period given that two different options with varying prices and durations are available.",
+        "strategy_solution": "Calculate total costs over periods; choose lower cost option.",
+        "rule_id": "rule_1766287787_0_630"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 3.0,
+        "usage_count": 2,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 50,
+        "current_age": 153
+      },
+      "rank_index": 189
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.25,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating total earnings given that an initial salary and a percentage increase after a specific period are provided.",
+        "strategy_solution": "Calculate initial period, apply increase, then compute remaining periods.",
+        "rule_id": "rule_1766289084_1_916"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 3.0,
+        "usage_count": 2,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 115,
+        "current_age": 88
+      },
+      "rank_index": 190
+    },
+    {
+      "rank_metrics": {
+        "expected_value": 0.25,
+        "uncertainty_variance": 0.0375,
+        "status": "NEW / EXPLORING"
+      },
+      "content": {
+        "pattern_trigger": "Calculating the total time given that a constant amount is added at regular intervals.",
+        "strategy_solution": "Convert total to units, divide by interval, multiply by period.",
+        "rule_id": "rule_1766289526_0_503"
+      },
+      "raw_stats": {
+        "alpha_success": 1.0,
+        "beta_failure": 3.0,
+        "usage_count": 2,
+        "raw_win_rate": "0.0%"
+      },
+      "lifecycle": {
+        "created_at_step": 138,
+        "current_age": 65
+      },
+      "rank_index": 191
+    }
+  ]
+}
