@@ -19,7 +19,7 @@ class ReflexionTrainerFull:
             trust_remote_code=True,
             gpu_memory_utilization=GPU_MEMORY_UTILIZATION,
             tensor_parallel_size=1,
-            max_model_len=2048,
+            max_model_len=4096,
             download_dir=HF_CACHE_DIR
         )
         
@@ -38,9 +38,9 @@ class ReflexionTrainerFull:
             temperature=0.1, top_p=0.9, max_tokens=MAX_NEW_TOKENS,
             stop=["<|im_end|>", "<|endoftext|>"]
         )
-        # 抽象参数 (低长度)
+        # 抽象参数 (Greedy Decode)
         self.params_abstract = SamplingParams(
-            temperature=0.5, top_p=0.9, max_tokens=64,
+            temperature=0.0, top_p=0.9, max_tokens=128,
             stop=["<|im_end|>", "<|endoftext|>"]
         )
 
@@ -49,6 +49,10 @@ class ReflexionTrainerFull:
         self.memory = MemoryManager(reset=True)
         self.debug_log_path = "debug_trace.jsonl"
         open(self.debug_log_path, "w").close() 
+
+    def get_hash(self, text):
+        import hashlib
+        return hashlib.md5(text.encode('utf-8')).hexdigest()
         
     def log_debug(self, data):
         import json
@@ -124,194 +128,248 @@ class ReflexionTrainerFull:
             
         return f"<|im_start|>user\n{content}<|im_end|>\n<|im_start|>assistant\n"
 
-    def verify_step_vllm(self, partial_prompt, gt, k=5):
+    def construct_abstraction_prompt(self, q):
+        content = f"""
+            Task: Identify the core mathematical concept and intent of the following problem.
+            Output a concise, abstract description of the problem and its condition.
+            ### Requirements
+            - **Format**: Your output must be a single sentence following this pattern: "[Abstract Problem Type] given that [Specific Conditions from the Question including numerical constraints, relationships, and constraints]"
+            - **Strict Constraint**: Do NOT include any specific numbers (e.g., 16, 3) or specific nouns (e.g., eggs, ducks) from the current problem. The principle must be universal. 
+
+            [Example]
+            Q: John has 5 apples and buys 3 more. How many?
+            A: Calculating the total sum of objects given that each part is provided.
+
+            [Target]
+            Q: {q}
+            A:"""
+        return f"<|im_start|>user\n{content}<|im_end|>\n<|im_start|>assistant\n"
+
+    def verify_step_vllm(self, partial_prompt, gt, k=1):
         """
-        验证当前步骤是否正确 (Monte Carlo Rollout).
-        逻辑：从当前步骤继续生成 k 次，如果其中有一次能得到正确答案，则认为当前步骤有效。
+        验证当前步骤是否正确。
+        Prompt 构造逻辑：给定前面的步骤，询问最后一步是否与 Ground Truth 矛盾。
         """
-        # 使用较高的 temperature 进行探索
-        params_rollout = SamplingParams(
-            n=k, 
-            temperature=0.7, 
-            top_p=0.9, 
-            max_tokens=1024, 
-            stop=["<|im_end|>", "<|endoftext|>"]
-        )
+        # 构造验证 Prompt
+        verify_content = f"""
+        I am solving a math problem.
+        [Previous Steps]
+        {partial_prompt.replace('<|im_start|>user', '').replace('<|im_start|>assistant', '').strip()}
+
+        [Ground Truth Answer]
+        {gt}
+
+        Evaluate ONLY the last step provided above.
+        Is this step logically correct and consistent with leading to the Ground Truth?
+        Answer strictly "Yes" or "No".
+        """
+        full_prompt = f"<|im_start|>user\n{verify_content}<|im_end|>\n<|im_start|>assistant\n"
         
-        # vLLM generate
-        outputs = self.llm.generate([partial_prompt], params_rollout, use_tqdm=False)
-        generated_texts = [o.text for o in outputs[0].outputs]
+        # 这里的 k 参数如果是为了多次采样验证，可以在这里扩展，目前简化为一次
+        outputs = self.batch_generate_vllm([full_prompt], self.params_verify)
+        resp = outputs[0].lower()
         
-        for text in generated_texts:
-            # 检查是否包含正确答案
-            # 1. 优先尝试提取 boxed
-            matches = re.findall(r'\\boxed\{([^}]+)\}', text)
-            if matches:
-                pred_val = matches[-1]
-                if self.check_answer(str(pred_val), gt):
-                    return True
-            
-            # 2. Fallback: 直接检查整个文本中的最后一个数字
-            if self.check_answer(text, gt):
-                return True
-                
-        return False
+        return "yes" in resp and "no" not in resp
 
     def self_explore_phase(self, epoch, still_incorrect_indices, chunk_questions, chunk_answers, index_to_rules=None):
         """
-        [Updated] Self-Explore Mechanism based on Iterative Correction (test.ipynb logic).
+        [极速版] Self-Explore 机制：
+        1. Hindsight: 强制生成正确路径 (Batch)
+        2. Contrast: 对比生成规则 (Batch)
+        3. Verification: 收集所有候选规则一次性并行验证 (Batch)
         """
         if not still_incorrect_indices:
             return
 
-        from transformers import AutoTokenizer
-        # Initialize tokenizer if not already done
-        if not hasattr(self, 'tokenizer'):
-            self.tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
+        tqdm.write(f" 🔍 Self-Exploring {len(still_incorrect_indices)} samples (Batch Optimized)...")
 
-        tqdm.write(f" 🔍 Self-Exploring {len(still_incorrect_indices)} samples (Iterative Correction)...")
-
-        # 1. Prepare Data
+        # 1. 准备数据
         target_questions = [chunk_questions[i] for i in still_incorrect_indices]
         target_answers = [chunk_answers[i] for i in still_incorrect_indices]
 
-        # Helper for answer extraction
-        def extract_answer_boxed(text):
-            matches = re.findall(r'\\boxed\{([^}]+)\}', text)
-            if matches:
-                return matches[-1]
-            return str(self.extract_number(text))
+        # ==========================================================
+        # Step 1: 错误路径 & 正确路径
+        # ==========================================================
+        prompts_wrong = [self.construct_prompt(q) for q in target_questions]
+        traces_wrong = self.batch_generate_vllm(prompts_wrong, self.params_inference)
 
-        # Principle Generation Prompt Template
-        generate_principle_prompt =  """You are a helpful math assistant. 
+        prompts_correct = []
+        for q, gt in zip(target_questions, target_answers):
+            hindsight_prompt = (
+                f"Question: {q}\n"
+                f"The correct answer is known to be: {gt}.\n"
+                f"Please provide a correct, step-by-step mathematical derivation that results in this answer.\n"
+                f"Answer step-by-step:"
+            )
+            prompts_correct.append(f"<|im_start|>user\n{hindsight_prompt}<|im_end|>\n<|im_start|>assistant\n")
 
-### Question
-{question}
+        traces_correct = self.batch_generate_vllm(prompts_correct, self.params_inference)
 
-### Student's Partial Reasoning
-{partial_reasoning}
+        # ==========================================================
+        # Step 2: Contrast 反思 (Two-Step Generation)
+        # ==========================================================
+        valid_indices = []
+        
+        # 1. Filter valid candidates
+        for i in range(len(target_questions)):
+            gt = target_answers[i]
+            w_trace = traces_wrong[i]
+            c_trace = traces_correct[i]
+            if not self.check_answer(w_trace, gt) and self.check_answer(c_trace, gt):
+                valid_indices.append(i)
+        
+        if not valid_indices:
+            return
 
-### The Error Step
-{error_step}
+        # 2. Step 2a: Abstract Trigger (Greedy)
+        # Use the exact same prompt and params as retrieval to ensure consistency
+        abstract_prompts = [self.construct_abstraction_prompt(target_questions[i]) for i in valid_indices]
+        abstract_outputs = self.batch_generate_vllm(abstract_prompts, self.params_abstract)
 
-### Right Answer
-{answer}
+        # 3. Step 2b: Generate Strategy (High Temp)
+        strategy_prompts = []
+        for idx, i in enumerate(valid_indices):
+            q = target_questions[i]
+            c_trace = traces_correct[i]
+            trigger = abstract_outputs[idx]
+            
+            strategy_content = f"""
+[TASK] Define a general mathematical strategy to solve this type of problem, based on the identified abstract condition and the correct solution.
 
-### Instruction
-The student failed to solve the problem correctly due to the error in the step above. 
-Please provide a **generalized principle** to help the student understand the underlying concept and avoid similar mistakes.
+[Question]
+{q}
 
-### Steps to Generate the Principle
-1. **Abstract the Problem and its Condition**: Identify the general category of this problem (e.g., "calculating compound probabilities", "finding the remaining amount after multiple subtractions") without referring to specific numbers or items in this problem.
-2. **Identify the Method**: Determine the correct general method or logical step required to solve this type of problem.
-3. **Formulate the Hint**: Combine these into a single sentence.
+[Correct Solution]
+{c_trace}
 
-### Requirements
-- **Format**: Your output must be a single sentence following this pattern: "To solve [Abstract Problem Description] with condition that [condition and specialty of the Problem], consider [General Method/Principle]."
-- **Strict Constraint**: Do NOT include any specific numbers (e.g., 16, 3) or specific nouns (e.g., eggs, ducks) from the current problem. The principle must be universal. """
+[Identified Abstract Condition (Trigger)]
+{trigger}
 
+STRICT OUTPUT FORMAT INSTRUCTION:
+Output the Strategy (B) that corresponds to the Trigger (A).
+
+[Format]
+**Strategy (B)**: [General Method/Principle]
+
+[!!FORBIDDEN!!]
+1. **NO NUMBERS**: Absolutely NO digits or number words.
+2. **NO SPECIFIC NOUNS**: Use abstract terms like "objects", "values".
+3. **LENGTH LIMIT**: MUST be under 20 words.
+[YOUR TURN]
+            """
+            strategy_prompts.append(f"<|im_start|>user\n{strategy_content}<|im_end|>\n<|im_start|>assistant\n")
+
+        strategy_outputs = self.batch_generate_vllm(strategy_prompts, self.params_reflection)
+
+        # 4. Combine for next step
+        reflections = []
+        contrast_metadata_map = valid_indices 
+        
+        for idx, strategy_text in enumerate(strategy_outputs):
+            trigger_text = abstract_outputs[idx]
+            # Synthesize the text for parse_reflection
+            combined_text = f"**Trigger (A)**: {trigger_text}\n{strategy_text}"
+            reflections.append(combined_text)
+
+        # ==========================================================
+        # Step 3: 解析规则 & 构造验证 prompt（🔧 FIX：完整 metadata）
+        # ==========================================================
+        verify_prompts = []
+        verify_candidates_metadata = []
+
+        for idx, reflection_text in enumerate(reflections):
+            original_idx = contrast_metadata_map[idx]
+
+            q = target_questions[original_idx]
+            gt = target_answers[original_idx]
+
+            parsed = self.parse_reflection(reflection_text)
+            if not parsed:
+                continue
+
+            trigger, strategy = parsed
+            if self.has_specific_numbers(strategy, q):
+                continue
+            if len(strategy) < 10:
+                continue
+
+            temp_embed = self.embedder.encode(trigger + " " + strategy, convert_to_numpy=True)
+            try:
+                existing = self.memory.collection.query(query_embeddings=[temp_embed], n_results=1)
+                if existing['ids'] and existing['ids'][0]:
+                    # 如果相似度非常高 (distance < 0.2)，说明库里已经有了，直接跳过，省下验证的时间
+                    if existing['distances'][0][0] < 0.2:
+                        print(f"   Duplicate rule detected (dist={existing['distances'][0][0]:.3f}), skipping verification.")
+                        continue
+            except Exception as e:
+                pass
+
+            v_prompt = self.construct_prompt(q, context=strategy)
+            verify_prompts.append(v_prompt)
+
+            # 🔧 FIX：保存 question / index / gt，避免错位
+            verify_candidates_metadata.append({
+                "trigger": trigger,
+                "strategy": strategy,
+                "question": q,
+                "gt": gt,
+                "local_idx": original_idx
+            })
+
+        # ==========================================================
+        # Step 4: Batch 验证
+        # ==========================================================
+        if not verify_prompts:
+            return
+
+        verify_outputs = self.batch_generate_vllm(verify_prompts, self.params_verify)
 
         new_patterns = []
         new_strategies = []
         new_embeddings_inputs = []
-        
-        MAX_RETRIES = 3
+        new_source_hashes = []
 
-        for idx, (q, gt) in enumerate(zip(target_questions, target_answers)):
-            # Initial Prompt
-            messages = [{"role": "user", "content": f"Question: {q.strip()}\nLet's solve this step by step. At the end, please enclose the final answer in \\boxed{{}}."}]
-            current_question_prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            
-            accumulated_principles = []
-            
-            for attempt in range(MAX_RETRIES + 1):
-                # Construct Prompt with Hints
-                if accumulated_principles:
-                    hints_str = "\n".join([f"Hint {i+1}: {p}" for i, p in enumerate(accumulated_principles)])
-                    content = f"Here are some hints to help you solve the problem:\n{hints_str}\n\nQuestion: {q.strip()}\nLet's solve this step by step. At the end, please enclose the final answer in \\boxed{{}}."
-                    messages = [{"role": "user", "content": content}]
-                    current_input_prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-                else:
-                    current_input_prompt = current_question_prompt
+        for i, pred in enumerate(verify_outputs):
+            meta = verify_candidates_metadata[i]
+            gt = meta["gt"]
+            q = meta["question"]
 
-                # Generate CoT
-                completions = self.batch_generate_vllm([current_input_prompt], self.params_inference)
-                comp = completions[0]
-                
-                # Check correctness
-                pred_ans = extract_answer_boxed(comp)
-                is_correct = False
-                if pred_ans:
-                    is_correct = self.check_answer(str(pred_ans), gt)
-                
-                if is_correct:
-                    # If solved and we have principles, collect them
-                    if accumulated_principles:
-                        for p in accumulated_principles:
-                            # Try to parse trigger
-                            match = re.search(r"To solve (.*?), consider (.*)", p, re.IGNORECASE)
-                            if match:
-                                trigger_text = match.group(1).strip()
-                                new_patterns.append(trigger_text)
-                                new_strategies.append(p)
-                                new_embeddings_inputs.append(trigger_text)
-                            else:
-                                new_patterns.append(q) # Fallback trigger
-                                new_strategies.append(p)
-                                new_embeddings_inputs.append(q)
-                    break # Solved, move to next question
-                
-                # If incorrect, analyze
-                if attempt < MAX_RETRIES:
-                    steps = [s.strip() for s in comp.split('\n') if s.strip()]
-                    verify_base_prompt = current_input_prompt
-                    found_error = False
-                    
-                    for i, step in enumerate(steps):
-                        verify_base_prompt += step + "\n"
-                        # Verify Step
-                        if not self.verify_step_vllm(verify_base_prompt, gt):
-                            found_error = True
-                            error_step = step
-                            partial_reasoning = "\n".join(steps[:i]) if i > 0 else "(No previous steps)"
-                            
-                            # Generate Principle
-                            short_gt = gt.split("####")[1].strip() if "####" in gt else gt
-                            p_prompt_content = generate_principle_prompt.format(
-                                question=q,
-                                partial_reasoning=partial_reasoning,
-                                error_step=error_step,
-                                answer=short_gt
-                            )
-                            p_messages = [
-                                {"role": "system", "content": "You are a helpful math assistant."},
-                                {"role": "user", "content": p_prompt_content}
-                            ]
-                            p_full_prompt = self.tokenizer.apply_chat_template(p_messages, tokenize=False, add_generation_prompt=True)
-                            
-                            p_outputs = self.batch_generate_vllm([p_full_prompt], self.params_reflection)
-                            principle = p_outputs[0]
-                            accumulated_principles.append(principle)
-                            break # Stop verifying, retry
-                    
-                    if not found_error:
-                        pass # Could not find error, just retry loop continues
+            if self.check_answer(pred, gt):
+                self.log_debug({
+                    "epoch": epoch,
+                    "phase": "rule_verified",
+                    "trigger": meta["trigger"],
+                    "strategy": meta["strategy"],
+                    "question": q,   # ✅ 绝对正确
+                    "gt": gt
+                })
+
+                tqdm.write(f"    ✅ Rule Verified: {meta['trigger'][:40]}... -> {meta['strategy'][:40]}...")
+                new_patterns.append(meta["trigger"])
+                new_strategies.append(meta["strategy"])
+                new_embeddings_inputs.append(meta["trigger"])
+                new_source_hashes.append(self.get_hash(q))
 
         if new_patterns:
             print(f" 💾 Adding {len(new_patterns)} high-quality rules to memory...")
             embeddings = self.embedder.encode(new_embeddings_inputs, convert_to_numpy=True)
-            self.memory.add_experience_batch(new_patterns, new_strategies, embeddings)
+            self.memory.add_experience_batch(new_patterns, new_strategies, embeddings, source_q_hashes=new_source_hashes)
 
 
     def run_full_evolution(self):
         # 1. 准备数据
-        dataset = load_dataset("gsm8k", "main")['train'] #.select(range(200)) 
+        # dataset = load_dataset("gsm8k", "main")['train']
+        full_dataset = load_dataset("qwedsacf/competition_math", split="train")
+        
+        # Split 10% for testing
+        split_dataset = full_dataset.train_test_split(test_size=0.1, seed=42)
+        dataset = split_dataset['train']
         
         total_len = len(dataset)
         print(f"⚡️ 正在预计算 {total_len} 条问题的 Embedding (CPU Mode)...")
         
-        all_questions_raw = dataset['question']
-        all_answers_raw = dataset['answer']
+        all_questions_raw = dataset['problem']
+        all_answers_raw = dataset['solution']
         
         # 预计算 Embeddings (Epoch 间复用)
         all_q_embeddings = self.embedder.encode(all_questions_raw, batch_size=64, show_progress_bar=True, convert_to_numpy=True)
@@ -445,8 +503,11 @@ Please provide a **generalized principle** to help the student understand the un
                     # 5. 更新 Memory 分数
                     final_usage = [rag_usage_for_update[k] for k in range(len(wrong_questions)) if rag_prompts[k] is not None]
                     
+                    # Prepare hashes for the questions that actually used RAG
+                    final_q_hashes = [self.get_hash(wrong_questions[k]) for k in range(len(wrong_questions)) if rag_prompts[k] is not None]
+
                     if final_usage:
-                        self.memory.update_scores_batch(final_usage, rag_is_correct_for_update, rag_outputs_for_update)
+                        self.memory.update_scores_batch(final_usage, rag_is_correct_for_update, rag_outputs_for_update, current_q_hashes=final_q_hashes)
 
                 # ================= 阶段 3: Self-Explore (仅针对 RAG 后依然错误的题) =================
                 if still_incorrect_indices:
@@ -483,31 +544,16 @@ Please provide a **generalized principle** to help the student understand the un
                 break
             else:
                 print("🔄 表现未达标，继续下一轮训练...")
+        
+        print("🏁 Training Finished. Pruning probationary rules...")
+        self.memory.prune_probationary_rules()
 
     def batch_abstract_for_retrieval(self, questions):
         """
         将具体问题转化为抽象的数学考点描述，用于检索。
         """
-        prompts = []
-        for q in questions:
-            content = f"""
-            Task: Identify the core mathematical concept and intent of the following problem.
-            Output a concise, abstract description of the problem and its condition.
-            ### Requirements
-            - **Format**: Your output must be a single sentence following this pattern: "[Abstract Problem Description] with condition that [condition and specialty of the Problem]"
-            - **Strict Constraint**: Do NOT include any specific numbers (e.g., 16, 3) or specific nouns (e.g., eggs, ducks) from the current problem. The principle must be universal. 
-
-            [Example]
-            Q: John has 5 apples and buys 3 more. How many?
-            A: Calculating the total sum of objects with condition that the each part is provided.
-
-            [Target]
-            Q: {q}
-            A:"""
-            prompts.append(f"<|im_start|>user\n{content}<|im_end|>\n<|im_start|>assistant\n")
-        
+        prompts = [self.construct_abstraction_prompt(q) for q in questions]
         abstract_queries = self.batch_generate_vllm(prompts, self.params_abstract)
-        
         return abstract_queries
 
     def extract_number(self, text):
@@ -520,6 +566,18 @@ Please provide a **generalized principle** to help the student understand the un
     def check_answer(self, pred, gt):
         if "####" in gt:
             gold = self.extract_number(gt.split("####")[1])
+        elif "\\boxed{" in gt:
+            try:
+                start = gt.rfind("\\boxed{") + 7
+                count = 1
+                end = start
+                while count > 0 and end < len(gt):
+                    if gt[end] == '{': count += 1
+                    elif gt[end] == '}': count -= 1
+                    end += 1
+                gold = self.extract_number(gt[start:end-1])
+            except:
+                gold = self.extract_number(gt)
         else:
             gold = self.extract_number(gt)
         pred_num = self.extract_number(pred)

@@ -19,7 +19,7 @@ class ReflexionTrainerFull:
             trust_remote_code=True,
             gpu_memory_utilization=GPU_MEMORY_UTILIZATION,
             tensor_parallel_size=1,
-            max_model_len=4096,
+            max_model_len=2048,
             download_dir=HF_CACHE_DIR
         )
         
@@ -358,14 +358,13 @@ Output the Strategy (B) that corresponds to the Trigger (A).
 
     def run_full_evolution(self):
         # 1. 准备数据
-        # dataset = load_dataset("gsm8k", "main")['train']
-        dataset = load_dataset("qwedsacf/competition_math", split="train")
+        dataset = load_dataset("gsm8k", "main")['train']
         
         total_len = len(dataset)
         print(f"⚡️ 正在预计算 {total_len} 条问题的 Embedding (CPU Mode)...")
         
-        all_questions_raw = dataset['problem']
-        all_answers_raw = dataset['solution']
+        all_questions_raw = dataset['question']
+        all_answers_raw = dataset['answer']
         
         # 预计算 Embeddings (Epoch 间复用)
         all_q_embeddings = self.embedder.encode(all_questions_raw, batch_size=64, show_progress_bar=True, convert_to_numpy=True)

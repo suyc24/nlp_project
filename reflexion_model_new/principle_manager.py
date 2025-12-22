@@ -146,6 +146,75 @@ class MemoryManager:
 
         return final_results
 
+    def batch_retrieve_active(self, query_embeddings, top_k: int = 3, threshold: float = 0.5) -> List[List[Tuple[str, float, str]]]:
+        # Robust Input Handling: Ensure input is a list of embeddings
+        if isinstance(query_embeddings, np.ndarray):
+            query_embeddings = query_embeddings.tolist()
+
+        if not isinstance(query_embeddings, list): 
+            query_embeddings = [query_embeddings]
+        elif query_embeddings and isinstance(query_embeddings[0], (int, float, np.floating)): 
+            query_embeddings = [query_embeddings]
+
+        count = self.collection.count()
+        if count == 0: return [[] for _ in query_embeddings]
+
+        # 1. Broad Fetch: Get enough candidates to perform re-ranking
+        try:
+            results = self.collection.query(
+                query_embeddings=query_embeddings,
+                n_results=min(count, top_k * 5),
+                where={"status": "active"},
+                include=['documents', 'distances', 'embeddings']
+            )
+        except Exception as e:
+            print(f"[Retrieve Error] Chroma query failed: {e}")
+            return [[] for _ in query_embeddings]
+
+        final_results = []
+
+        # 2. Bayesian Reranking using Thompson Sampling
+        # Zip ensures we don't crash if Chroma returns inconsistent list lengths
+        for ids, docs, dists in zip(results.get('ids', []), results.get('documents', []), results.get('distances', [])):
+            ranked_candidates = []
+            
+            for i in range(len(ids)):
+                sid = ids[i]
+                dist = dists[i]
+                
+                # Convert L2 Distance to Similarity (approx 0 to 1)
+                similarity = 1.0 / (1.0 + dist)
+                
+                # Get Bayesian Priors (Default to Uniform 1.0/1.0 if missing)
+                stat = self.stats.get(sid, {'alpha': 1.0, 'beta': 1.0})
+                
+                # Thompson Sampling: Sample from Beta Distribution
+                # High variance (new rules) -> chance to sample high
+                quality_sample = np.random.beta(stat['alpha'], stat['beta'])
+                
+                # Combined Score
+                score = similarity * quality_sample
+                
+                # Soft threshold: Skip if extremely distant, unless it's a "super rule" (EV > 0.9)
+                expected_val = stat['alpha'] / (stat['alpha'] + stat['beta'])
+                min_sim = 1.0 / (1.0 + threshold)
+                if similarity < min_sim and expected_val < 0.9:
+                    continue
+
+                ranked_candidates.append((-score, docs[i], dist, sid)) # Negate score for min-heap style sort
+            
+            # Sort by Score Descending
+            ranked_candidates.sort(key=lambda x: x[0]) 
+            
+            # Extract top_k
+            final_results.append([(item[1], item[2], item[3]) for item in ranked_candidates[:top_k]])
+
+        # Fill empty slots if any mismatch occurred
+        while len(final_results) < len(query_embeddings):
+            final_results.append([])
+
+        return final_results
+
     # Purpose: Add new rules. Manages Capacity (Eviction) and Duplicates.
     # Arguments:
     #   - patterns: List of rule patterns strings.
